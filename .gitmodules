@@ -1,0 +1,3 @@
+[submodule "glideavif/src/main/cpp/libavif"]
+	path = glideavif/src/main/cpp/libavif
+	url = https://github.com/AOMediaCodec/libavif.git
