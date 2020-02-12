@@ -1,10 +1,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
-
 
     defaultConfig {
         minSdkVersion 21
@@ -14,6 +15,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
     }
 
     buildTypes {
@@ -22,7 +26,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.10.2"
+        }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs 'src/main/cpp/lib/'
+        }
+    }
 }
 
 dependencies {
@@ -33,4 +47,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+
+    implementation("com.github.bumptech.glide:glide:4.11.0") {
+        exclude group: "com.android.support"
+    }
+    implementation "com.android.support:support-fragment"
+    kapt 'com.github.bumptech.glide:compiler:4.11.0'
 }
