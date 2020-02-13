@@ -11,9 +11,11 @@ class MyBitmap {
     AndroidBitmapInfo info;
 
 public:
-    MyBitmap(JNIEnv *env, jobject jbitmap);
+    MyBitmap(JNIEnv *env, int width, int height);
 
     void Load(const std::vector<uint8_t> &rgbaList);
+
+    jobject Bitmap() { return jbitmap; }
 };
 
 #endif
