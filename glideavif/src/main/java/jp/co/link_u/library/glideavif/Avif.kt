@@ -29,11 +29,9 @@ class Avif(inputStream: InputStream) {
         private fun toByteArray(s: InputStream): ByteArray {
             val buffer = ByteArrayOutputStream()
 
-            var nRead: Int
             val data = ByteArray(16384)
-
             while (true) {
-                nRead = s.read(data, 0, data.size)
+                val nRead = s.read(data, 0, data.size)
                 if (nRead == -1) {
                     break
                 }

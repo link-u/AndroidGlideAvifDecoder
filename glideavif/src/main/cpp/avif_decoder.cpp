@@ -37,6 +37,54 @@ bool isGrayscale(avifImage *im) {
     return !(im->yuvRowBytes[1] && im->yuvRowBytes[2]);
 }
 
+class SourceData {
+public:
+    SourceData(JNIEnv *env, jbyteArray sourceData) {
+        this->env = env;
+        this->sourceData = sourceData;
+        bytes = env->GetByteArrayElements(sourceData, nullptr);
+    }
+
+    ~SourceData() {
+        env->ReleaseByteArrayElements(sourceData, bytes, JNI_ABORT);
+    }
+
+    jbyte *getBytes() const {
+        return bytes;
+    }
+
+    SourceData(const SourceData &) = delete;
+
+    SourceData &operator=(const SourceData &) = delete;
+
+private:
+    JNIEnv *env;
+    jbyteArray sourceData;
+    jbyte *bytes;
+};
+
+class AvifDecoder {
+public:
+    AvifDecoder() {
+        decoder = avifDecoderCreate();
+    }
+
+    ~AvifDecoder() {
+        avifDecoderDestroy(decoder);
+    }
+
+    avifDecoder *getDecoder() {
+        return decoder;
+    }
+
+    AvifDecoder(const AvifDecoder &) = delete;
+
+    AvifDecoder &operator=(const AvifDecoder &) = delete;
+
+private:
+    avifDecoder *decoder;
+};
+
 extern "C" JNIEXPORT jobject JNICALL
 Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
         JNIEnv *env,
@@ -44,18 +92,19 @@ Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
         jbyteArray sourceData,
         int sourceDataLength
 ) {
-    jbyte *bytes = env->GetByteArrayElements(sourceData, nullptr);
-    if (bytes == nullptr) {
+    SourceData sd(env, sourceData);
+    if (sd.getBytes() == nullptr) {
         LOGD("allocation failed");
         return nullptr;
     }
 
     avifROData raw;
-    raw.data = (const uint8_t *) bytes;
+    raw.data = (const uint8_t *) sd.getBytes();
     raw.size = (size_t) sourceDataLength;
 
-    avifDecoder *decoder = avifDecoderCreate();
-    avifResult result = avifDecoderParse(decoder, &raw);
+    AvifDecoder ad;
+    auto decoder = ad.getDecoder();
+    auto result = avifDecoderParse(decoder, &raw);
     if (result != AVIF_RESULT_OK) {
         LOGD("parse failed");
         return nullptr;
@@ -67,7 +116,7 @@ Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
         return nullptr;
     }
 
-    avifImage *im = decoder->image;
+    auto im = decoder->image;
     std::vector<uint8_t> rgbaList(im->width * im->height * 4);
 
     if (isGrayscale(im)) {
@@ -86,7 +135,11 @@ Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
                 return nullptr;
         }
     } else {
-        avifImageYUVToRGB(im);
+        result = avifImageYUVToRGB(im);
+        if (result != AVIF_RESULT_OK) {
+            LOGD("convert yuv to rgb failed");
+            return nullptr;
+        }
 
         switch (im->depth) {
             case 8:
@@ -118,9 +171,6 @@ Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
             }
         }
     }
-
-    avifDecoderDestroy(decoder);
-    env->ReleaseByteArrayElements(sourceData, bytes, JNI_ABORT);
 
     auto bitmap = new MyBitmap(env, im->width, im->height);
     bitmap->Load(rgbaList);

@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
         viewAdapter = MyAdapter(requestBuilder, images)
 
         recyclerView = findViewById<RecyclerView>(R.id.image_list).apply {
+            setItemViewCacheSize(6)
             setHasFixedSize(true)
             layoutManager = viewManager
             adapter = viewAdapter
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
 
             holder.textView.text = name.split(".").joinToString("\n")
             requestBuilder
+                .skipMemoryCache(true)
                 .load("https://github.com/link-u/avif-sample-images/raw/master/$name")
                 .into(holder.imageView)
         }
