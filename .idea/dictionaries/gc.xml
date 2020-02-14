@@ -2,6 +2,7 @@
   <dictionary name="gc">
     <words>
       <w>avif</w>
+      <w>grayscale</w>
       <w>transcoder</w>
     </words>
   </dictionary>

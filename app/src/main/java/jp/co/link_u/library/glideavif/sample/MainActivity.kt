@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
             val name = images[position]
 
-            holder.textView.text = name
+            holder.textView.text = name.split(".").joinToString("\n")
             requestBuilder
                 .load("https://github.com/link-u/avif-sample-images/raw/master/$name")
                 .into(holder.imageView)
