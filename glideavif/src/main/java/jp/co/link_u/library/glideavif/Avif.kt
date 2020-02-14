@@ -1,7 +1,6 @@
 package jp.co.link_u.library.glideavif
 
 import android.graphics.Bitmap
-import android.util.Log
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
@@ -12,13 +11,15 @@ class Avif(inputStream: InputStream) {
     init {
         val byteArray = toByteArray(inputStream)
 
-        this.bitmap = decodeAvif(byteArray, byteArray.size)
+        this.bitmap =
+            decodeAvif(byteArray, byteArray.size)
+                ?: throw DecodeException("avif decode failed")
     }
 
     private external fun decodeAvif(
         byteArray: ByteArray,
         byteArrayLength: Int
-    ): Bitmap
+    ): Bitmap?
 
     companion object {
         fun getFromInputStream(s: InputStream): Avif {

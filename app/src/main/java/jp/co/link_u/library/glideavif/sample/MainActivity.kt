@@ -39,7 +39,9 @@ class MainActivity : AppCompatActivity() {
                     + R.raw.avif_sample
         )
 
-        requestBuilder.load(uri).into(imageViewRes1)
+        requestBuilder
+            .load("https://github.com/link-u/avif-sample-images/raw/master/fox.profile0.8bpc.yuv420.avif")
+            .into(imageViewRes1)
 
         val uri2 = Uri.parse(
             ContentResolver.SCHEME_ANDROID_RESOURCE

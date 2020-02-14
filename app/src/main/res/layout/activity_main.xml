@@ -19,6 +19,7 @@
             android:id="@+id/svg_image_view1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="#808"
             android:src="@drawable/ic_launcher_foreground" />
 
@@ -26,6 +27,7 @@
             android:id="@+id/svg_image_view2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="#880"
             android:src="@drawable/ic_launcher_foreground" />
 
@@ -33,6 +35,7 @@
             android:id="@+id/svg_image_view3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="#088"
             android:src="@drawable/ic_launcher_foreground" />
     </LinearLayout>
