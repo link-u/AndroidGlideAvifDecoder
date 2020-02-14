@@ -172,7 +172,15 @@ Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
         }
     }
 
-    auto bitmap = new MyBitmap(env, im->width, im->height);
-    bitmap->Load(rgbaList);
-    return bitmap->Bitmap();
+    jobject bitmapObj;
+    try {
+        MyBitmap bitmap(env, im->width, im->height);
+        bitmap.Load(rgbaList);
+        bitmapObj = bitmap.Bitmap();
+    }
+    catch (const MyBitmap::MyException &e) {
+        LOGD("%s", e.getMessage());
+        return nullptr;
+    }
+    return bitmapObj;
 }
