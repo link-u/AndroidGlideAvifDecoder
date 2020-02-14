@@ -5,9 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
         android:paddingRight="16dp"
@@ -17,9 +18,22 @@
         <ImageView
             android:id="@+id/svg_image_view1"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="#808"
             android:src="@drawable/ic_launcher_foreground" />
-    </RelativeLayout>
 
+        <ImageView
+            android:id="@+id/svg_image_view2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#880"
+            android:src="@drawable/ic_launcher_foreground" />
+
+        <ImageView
+            android:id="@+id/svg_image_view3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#088"
+            android:src="@drawable/ic_launcher_foreground" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

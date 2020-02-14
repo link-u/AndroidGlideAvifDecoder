@@ -11,14 +11,18 @@ import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var imageViewRes: ImageView
+    private lateinit var imageViewRes1: ImageView
+    private lateinit var imageViewRes2: ImageView
+    private lateinit var imageViewRes3: ImageView
     private lateinit var requestBuilder: RequestBuilder<Drawable>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        imageViewRes = findViewById(R.id.svg_image_view1)
+        imageViewRes1 = findViewById(R.id.svg_image_view1)
+        imageViewRes2 = findViewById(R.id.svg_image_view2)
+        imageViewRes3 = findViewById(R.id.svg_image_view3)
 
         requestBuilder = Glide.with(this)
             .asDrawable()
@@ -35,6 +39,26 @@ class MainActivity : AppCompatActivity() {
                     + R.raw.avif_sample
         )
 
-        requestBuilder.load(uri).into(imageViewRes)
+        requestBuilder.load(uri).into(imageViewRes1)
+
+        val uri2 = Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE
+                    + "://"
+                    + packageName
+                    + "/"
+                    + R.raw.avif_sample2
+        )
+
+        requestBuilder.load(uri2).into(imageViewRes2)
+
+        val uri3 = Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE
+                    + "://"
+                    + packageName
+                    + "/"
+                    + R.raw.avif_sample3
+        )
+
+        requestBuilder.load(uri3).into(imageViewRes3)
     }
 }
