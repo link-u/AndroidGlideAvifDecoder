@@ -5,38 +5,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/image_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
         android:paddingRight="16dp"
         android:paddingBottom="16dp"
-        tools:context=".MainActivity">
+        android:scrollbars="vertical" />
 
-        <ImageView
-            android:id="@+id/svg_image_view1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#808"
-            android:src="@drawable/ic_launcher_foreground" />
-
-        <ImageView
-            android:id="@+id/svg_image_view2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#880"
-            android:src="@drawable/ic_launcher_foreground" />
-
-        <ImageView
-            android:id="@+id/svg_image_view3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#088"
-            android:src="@drawable/ic_launcher_foreground" />
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
