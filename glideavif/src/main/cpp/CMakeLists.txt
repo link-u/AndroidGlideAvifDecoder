@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-add_library(native-lib SHARED native-lib.cpp my_bitmap.cpp)
+add_library(avif_decoder SHARED avif_decoder.cpp my_bitmap.cpp)
+
 find_library(log-lib log)
 
 add_library(dav1d SHARED IMPORTED)
@@ -13,7 +14,7 @@ set(AVIF_CODEC_DAV1D ON CACHE BOOL "Use the dav1d codec for decoding (overrides 
 add_subdirectory(libavif EXCLUDE_FROM_ALL)
 
 target_link_libraries(
-        native-lib
+        avif_decoder
         android
         jnigraphics
         dav1d
