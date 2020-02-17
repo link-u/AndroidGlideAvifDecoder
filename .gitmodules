@@ -1,3 +1,6 @@
 [submodule "glideavif/src/main/cpp/libavif"]
 	path = glideavif/src/main/cpp/libavif
 	url = https://github.com/AOMediaCodec/libavif.git
+[submodule "glideavif/src/main/cpp/jni_util"]
+	path = glideavif/src/main/cpp/jni_util
+	url = git@github.com:gc-locks/jni_util.git
