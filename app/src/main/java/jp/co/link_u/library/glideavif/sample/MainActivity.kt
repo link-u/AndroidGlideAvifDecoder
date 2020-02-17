@@ -28,7 +28,11 @@ class MainActivity : AppCompatActivity() {
             .transition(withCrossFade())
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = MyAdapter(requestBuilder, images)
+        viewAdapter = MyAdapter(
+            requestBuilder,
+            resources.getString(R.string.resource_root),
+            resources.getStringArray(R.array.resource_names)
+        )
 
         recyclerView = findViewById<RecyclerView>(R.id.image_list).apply {
             setItemViewCacheSize(6)
@@ -40,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     class MyAdapter(
         private val requestBuilder: RequestBuilder<Drawable>,
+        private val resourceRoot: String,
         private val images: Array<String>
     ) :
         RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
@@ -61,79 +66,10 @@ class MainActivity : AppCompatActivity() {
             holder.textView.text = name.split(".").joinToString("\n")
             requestBuilder
                 .skipMemoryCache(true)
-                .load("https://github.com/link-u/avif-sample-images/raw/master/$name")
+                .load(resourceRoot + name)
                 .into(holder.imageView)
         }
 
         override fun getItemCount() = images.size - 1
     }
 }
-
-val images =
-    arrayOf(
-        "fox.profile0.8bpc.yuv420.avif",
-        "fox.profile0.8bpc.yuv420.odd-width.avif",
-        "fox.profile0.8bpc.yuv420.odd-height.avif",
-        "fox.profile0.8bpc.yuv420.odd-width.odd-height.avif",
-        "fox.profile0.8bpc.yuv420.monochrome.avif",
-        "fox.profile0.8bpc.yuv420.monochrome.odd-width.avif",
-        "fox.profile0.8bpc.yuv420.monochrome.odd-height.avif",
-        "fox.profile0.8bpc.yuv420.monochrome.odd-width.odd-height.avif",
-        "fox.profile0.10bpc.yuv420.avif",
-        "fox.profile0.10bpc.yuv420.odd-width.avif",
-        "fox.profile0.10bpc.yuv420.odd-height.avif",
-        "fox.profile0.10bpc.yuv420.odd-width.odd-height.avif",
-        "fox.profile0.10bpc.yuv420.monochrome.avif",
-        "fox.profile0.10bpc.yuv420.monochrome.odd-width.avif",
-        "fox.profile0.10bpc.yuv420.monochrome.odd-height.avif",
-        "fox.profile0.10bpc.yuv420.monochrome.odd-width.odd-height.avif",
-        "fox.profile2.12bpc.yuv420.avif",
-        "fox.profile2.12bpc.yuv420.odd-width.avif",
-        "fox.profile2.12bpc.yuv420.odd-height.avif",
-        "fox.profile2.12bpc.yuv420.odd-width.odd-height.avif",
-        "fox.profile2.12bpc.yuv420.monochrome.avif",
-        "fox.profile2.12bpc.yuv420.monochrome.odd-width.avif",
-        "fox.profile2.12bpc.yuv420.monochrome.odd-height.avif",
-        "fox.profile2.12bpc.yuv420.monochrome.odd-width.odd-height.avif",
-        "fox.profile2.8bpc.yuv422.avif",
-        "fox.profile2.8bpc.yuv422.odd-width.avif",
-        "fox.profile2.8bpc.yuv422.odd-height.avif",
-        "fox.profile2.8bpc.yuv422.odd-width.odd-height.avif",
-        "fox.profile2.8bpc.yuv422.monochrome.avif",
-        "fox.profile2.8bpc.yuv422.monochrome.odd-width.avif",
-        "fox.profile2.8bpc.yuv422.monochrome.odd-height.avif",
-        "fox.profile2.8bpc.yuv422.monochrome.odd-width.odd-height.avif",
-        "fox.profile2.10bpc.yuv422.avif",
-        "fox.profile2.10bpc.yuv422.odd-width.avif",
-        "fox.profile2.10bpc.yuv422.odd-height.avif",
-        "fox.profile2.10bpc.yuv422.odd-width.odd-height.avif",
-        "fox.profile2.10bpc.yuv422.monochrome.avif",
-        "fox.profile2.10bpc.yuv422.monochrome.odd-width.avif",
-        "fox.profile2.10bpc.yuv422.monochrome.odd-height.avif",
-        "fox.profile2.10bpc.yuv422.monochrome.odd-width.odd-height.avif",
-        "fox.profile2.12bpc.yuv422.avif",
-        "fox.profile2.12bpc.yuv422.odd-width.avif",
-        "fox.profile2.12bpc.yuv422.odd-height.avif",
-        "fox.profile2.12bpc.yuv422.odd-width.odd-height.avif",
-        "fox.profile2.12bpc.yuv422.monochrome.avif",
-        "fox.profile2.12bpc.yuv422.monochrome.odd-width.avif",
-        "fox.profile2.12bpc.yuv422.monochrome.odd-height.avif",
-        "fox.profile2.12bpc.yuv422.monochrome.odd-width.odd-height.avif",
-        "fox.profile1.8bpc.yuv444.avif",
-        "fox.profile1.8bpc.yuv444.odd-width.avif",
-        "fox.profile1.8bpc.yuv444.odd-height.avif",
-        "fox.profile1.8bpc.yuv444.odd-width.odd-height.avif",
-        "fox.profile1.10bpc.yuv444.avif",
-        "fox.profile1.10bpc.yuv444.odd-width.avif",
-        "fox.profile1.10bpc.yuv444.odd-height.avif",
-        "fox.profile1.10bpc.yuv444.odd-width.odd-height.avif",
-        "fox.profile2.12bpc.yuv444.avif",
-        "fox.profile2.12bpc.yuv444.odd-width.avif",
-        "fox.profile2.12bpc.yuv444.odd-height.avif",
-        "fox.profile2.12bpc.yuv444.odd-width.odd-height.avif",
-        "fox.profile2.12bpc.yuv444.monochrome.avif",
-        "fox.profile2.12bpc.yuv444.monochrome.odd-width.avif",
-        "fox.profile2.12bpc.yuv444.monochrome.odd-height.avif",
-        "fox.profile2.12bpc.yuv444.monochrome.odd-width.odd-height.avif",
-        ""
-    )
