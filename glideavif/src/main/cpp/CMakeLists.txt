@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-add_library(avif_decoder SHARED avif_decoder.cpp my_bitmap.cpp)
+add_library(avif_decoder SHARED common.cpp avif_decoder.cpp my_bitmap.cpp)
 
 find_library(log-lib log)
 
@@ -8,6 +8,7 @@ add_library(dav1d SHARED IMPORTED)
 set_target_properties(dav1d PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${ANDROID_ABI}/libdav1d.so)
 
 include_directories(include)
+include_directories(jni_util/include)
 
 # libavif
 set(AVIF_CODEC_DAV1D ON CACHE BOOL "Use the dav1d codec for decoding (overrides AOM decoding if also enabled)" FORCE)

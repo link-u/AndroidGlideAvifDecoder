@@ -2,14 +2,18 @@
 #include <string>
 #include <avif/avif.h>
 #include <android/log.h>
+#include <jni_util.hpp>
 
+#include "common.hpp"
 #include "my_bitmap.hpp"
 
-#define TAG               "AvifDecoder"
-#define LOGD(...)         __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
-
 template<typename T, size_t depth>
-void copyColorPixels(avifImage *im, std::vector<uint8_t> &rgbaList) {
+void copyColorPixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
+    uint32_t w = im->width * sizeof(T) / sizeof(uint8_t);
+    if (im->rgbRowBytes[0] != w || im->rgbRowBytes[1] != w || im->rgbRowBytes[2] != w) {
+        throwException(env, "invalid rgb bytes");
+    }
+
     for (int k = 0; k < 3; ++k) {
         for (int i = 0; i < im->height; ++i) {
             auto p = (T *) (im->rgbPlanes[k] + (i * im->rgbRowBytes[k]));
@@ -21,7 +25,12 @@ void copyColorPixels(avifImage *im, std::vector<uint8_t> &rgbaList) {
 }
 
 template<typename T, size_t depth>
-void copyGrayscalePixels(avifImage *im, std::vector<uint8_t> &rgbaList) {
+void copyGrayscalePixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
+    uint32_t w = im->width * sizeof(T) / sizeof(uint8_t);
+    if (im->yuvRowBytes[0] < w) {
+        throwException(env, "invalid yuv bytes");
+    }
+
     for (int i = 0; i < im->height; ++i) {
         auto p = (T *) (im->yuvPlanes[0] + (i * im->yuvRowBytes[0]));
         for (int j = 0; j < im->width; ++j) {
@@ -36,32 +45,6 @@ void copyGrayscalePixels(avifImage *im, std::vector<uint8_t> &rgbaList) {
 bool isGrayscale(avifImage *im) {
     return !(im->yuvRowBytes[1] && im->yuvRowBytes[2]);
 }
-
-class SourceData {
-public:
-    SourceData(JNIEnv *env, jbyteArray sourceData) {
-        this->env = env;
-        this->sourceData = sourceData;
-        bytes = env->GetByteArrayElements(sourceData, nullptr);
-    }
-
-    ~SourceData() {
-        env->ReleaseByteArrayElements(sourceData, bytes, JNI_ABORT);
-    }
-
-    jbyte *getBytes() const {
-        return bytes;
-    }
-
-    SourceData(const SourceData &) = delete;
-
-    SourceData &operator=(const SourceData &) = delete;
-
-private:
-    JNIEnv *env;
-    jbyteArray sourceData;
-    jbyte *bytes;
-};
 
 class AvifDecoder {
 public:
@@ -85,35 +68,26 @@ private:
     avifDecoder *decoder;
 };
 
-extern "C" JNIEXPORT jobject JNICALL
-Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
-        JNIEnv *env,
-        jobject,
-        jbyteArray sourceData,
-        int sourceDataLength
-) {
-    SourceData sd(env, sourceData);
-    if (sd.getBytes() == nullptr) {
-        LOGD("allocation failed");
-        return nullptr;
+jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
+    jni_util::CopiedArrayAccess<jbyte> source(env, sourceData, JNI_ABORT);
+    if (source.elements() == nullptr) {
+        throwException(env, "allocation failed");
     }
 
     avifROData raw;
-    raw.data = (const uint8_t *) sd.getBytes();
+    raw.data = (const uint8_t *) source.elements();
     raw.size = (size_t) sourceDataLength;
 
     AvifDecoder ad;
     auto decoder = ad.getDecoder();
     auto result = avifDecoderParse(decoder, &raw);
     if (result != AVIF_RESULT_OK) {
-        LOGD("parse failed");
-        return nullptr;
+        throwException(env, "parse failed");
     }
 
     result = avifDecoderNextImage(decoder);
     if (result != AVIF_RESULT_OK) {
-        LOGD("decode failed");
-        return nullptr;
+        throwException(env, "decode failed");
     }
 
     auto im = decoder->image;
@@ -122,38 +96,35 @@ Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
     if (isGrayscale(im)) {
         switch (im->depth) {
             case 8:
-                copyGrayscalePixels<uint8_t, 8>(im, rgbaList);
+                copyGrayscalePixels<uint8_t, 8>(env, im, rgbaList);
                 break;
             case 10:
-                copyGrayscalePixels<uint16_t, 10>(im, rgbaList);
+                copyGrayscalePixels<uint16_t, 10>(env, im, rgbaList);
                 break;
             case 12:
-                copyGrayscalePixels<uint16_t, 12>(im, rgbaList);
+                copyGrayscalePixels<uint16_t, 12>(env, im, rgbaList);
                 break;
             default:
-                LOGD("unknown color depth");
-                return nullptr;
+                throwException(env, "unknown color depth");
         }
     } else {
         result = avifImageYUVToRGB(im);
         if (result != AVIF_RESULT_OK) {
-            LOGD("convert yuv to rgb failed");
-            return nullptr;
+            throwException(env, "convert yuv to rgb failed");
         }
 
         switch (im->depth) {
             case 8:
-                copyColorPixels<uint8_t, 8>(im, rgbaList);
+                copyColorPixels<uint8_t, 8>(env, im, rgbaList);
                 break;
             case 10:
-                copyColorPixels<uint16_t, 10>(im, rgbaList);
+                copyColorPixels<uint16_t, 10>(env, im, rgbaList);
                 break;
             case 12:
-                copyColorPixels<uint16_t, 12>(im, rgbaList);
+                copyColorPixels<uint16_t, 12>(env, im, rgbaList);
                 break;
             default:
-                LOGD("unknown color depth");
-                return nullptr;
+                throwException(env, "unknown color depth");
         }
     }
 
@@ -172,15 +143,22 @@ Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
         }
     }
 
-    jobject bitmapObj;
+    MyBitmap bitmap(env, im->width, im->height);
+    bitmap.Load(rgbaList);
+    return bitmap.Bitmap();
+}
+
+extern "C" JNIEXPORT jobject JNICALL
+Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
+        JNIEnv *env,
+        jobject,
+        jbyteArray sourceData,
+        int sourceDataLength
+) {
     try {
-        MyBitmap bitmap(env, im->width, im->height);
-        bitmap.Load(rgbaList);
-        bitmapObj = bitmap.Bitmap();
+        return decodeAvif(env, sourceData, sourceDataLength);
     }
-    catch (const MyBitmap::MyException &e) {
-        LOGD("%s", e.getMessage());
+    catch (const std::exception &e) {
         return nullptr;
     }
-    return bitmapObj;
 }

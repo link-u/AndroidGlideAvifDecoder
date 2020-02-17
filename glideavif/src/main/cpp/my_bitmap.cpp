@@ -2,8 +2,10 @@
 // Created by gc on 20/02/06.
 //
 
+#include <stdexcept>
 #include <jni.h>
 
+#include "common.hpp"
 #include "my_bitmap.hpp"
 
 template<const char *name>
@@ -63,27 +65,27 @@ MyBitmap::MyBitmap(JNIEnv *env, int width, int height) {
     this->jbitmap = createBitmap(env, width, height);
 
     if (AndroidBitmap_getInfo(env, jbitmap, &this->info) != ANDROID_BITMAP_RESULT_SUCCESS) {
-        throw MyException("get info from bitmap failed");
+        throwException(env, "get info from bitmap failed");
     }
 
     if (this->info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
-        throw MyException("invalid bitmap format");
+        throwException(env, "invalid bitmap format");
     }
 }
 
 void MyBitmap::Load(const std::vector<uint8_t> &rgbaList) {
     if (info.stride * info.height != rgbaList.size()) {
-        throw MyException("invalid array size");
+        throwException(env, "invalid array size");
     }
 
     void *ptr;
     if (AndroidBitmap_lockPixels(env, jbitmap, &ptr) < 0) {
-        throw MyException("lock bitmap failed");
+        throwException(env, "lock bitmap failed");
     }
 
     memcpy(ptr, (void *) rgbaList.data(), rgbaList.size());
 
     if (AndroidBitmap_unlockPixels(env, jbitmap) < 0) {
-        throw MyException("unlock bitmap failed");
+        throwException(env, "unlock bitmap failed");
     }
 }
