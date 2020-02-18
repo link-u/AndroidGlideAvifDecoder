@@ -14,11 +14,15 @@ include_directories(jni_util/include)
 set(AVIF_CODEC_DAV1D ON CACHE BOOL "Use the dav1d codec for decoding (overrides AOM decoding if also enabled)" FORCE)
 add_subdirectory(libavif EXCLUDE_FROM_ALL)
 
+add_subdirectory(libyuv EXCLUDE_FROM_ALL)
+include_directories(libyuv/include)
+
 target_link_libraries(
         avif_decoder
         android
         jnigraphics
         dav1d
         avif
+        yuv
         ${log-lib}
 )

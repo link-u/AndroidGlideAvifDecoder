@@ -45,6 +45,7 @@ class Avif(inputStream: InputStream) {
         init {
             System.loadLibrary("dav1d")
             System.loadLibrary("avif")
+            System.loadLibrary("yuv")
             System.loadLibrary("avif_decoder")
         }
     }

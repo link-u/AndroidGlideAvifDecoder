@@ -70,6 +70,6 @@ class MainActivity : AppCompatActivity() {
                 .into(holder.imageView)
         }
 
-        override fun getItemCount() = images.size - 1
+        override fun getItemCount() = images.size
     }
 }

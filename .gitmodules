@@ -4,3 +4,6 @@
 [submodule "glideavif/src/main/cpp/jni_util"]
 	path = glideavif/src/main/cpp/jni_util
 	url = git@github.com:gc-locks/jni_util.git
+[submodule "glideavif/src/main/cpp/libyuv"]
+	path = glideavif/src/main/cpp/libyuv
+	url = https://chromium.googlesource.com/libyuv/libyuv
