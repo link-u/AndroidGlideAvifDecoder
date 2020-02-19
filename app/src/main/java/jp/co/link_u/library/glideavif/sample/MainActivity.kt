@@ -20,10 +20,6 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -32,14 +28,14 @@ class MainActivity : AppCompatActivity() {
             .asDrawable()
             .transition(withCrossFade())
 
-        viewManager = LinearLayoutManager(this)
-        viewAdapter = MyAdapter(
+        val viewManager = LinearLayoutManager(this)
+        val viewAdapter = MyAdapter(
             requestBuilder,
             resources.getString(R.string.resource_root),
             resources.getStringArray(R.array.resource_names)
         )
 
-        recyclerView = findViewById<RecyclerView>(R.id.image_list).apply {
+        findViewById<RecyclerView>(R.id.image_list).apply {
             setItemViewCacheSize(6)
             setHasFixedSize(true)
             layoutManager = viewManager
