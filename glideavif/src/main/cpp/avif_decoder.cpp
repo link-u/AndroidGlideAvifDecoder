@@ -22,6 +22,12 @@ void copyColorPixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList)
             }
         }
     }
+
+    for (int i = 0; i < im->height; ++i) {
+        for (int j = 0; j < im->width; ++j) {
+            rgbaList.at(4 * (i * im->width + j) + 3) = 0xff;
+        }
+    }
 }
 
 template<typename T>
@@ -31,13 +37,12 @@ void copyGrayscalePixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaL
         throwException(env, "invalid yuv bytes");
     }
 
+    auto array = (uint32_t *) rgbaList.data();
     for (int i = 0; i < im->height; ++i) {
         auto p = (T *) (im->yuvPlanes[0] + (i * im->yuvRowBytes[0]));
         for (int j = 0; j < im->width; ++j) {
-            uint8_t c = p[j] >> (im->depth - 8);
-            for (int k = 0; k < 3; ++k) {
-                rgbaList.at(4 * (i * im->width + j) + k) = c;
-            }
+            uint32_t c0 = p[j] >> (im->depth - 8);
+            array[i * im->width + j] = 0xff000000 | (c0 << 16U) | (c0 << 8U) | c0;
         }
     }
 }
@@ -169,12 +174,6 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
             for (int j = 0; j < im->width; ++j) {
                 uint8_t c = im->alphaPlane[i * im->alphaRowBytes + j];
                 rgbaList.at(4 * (i * im->width + j) + 3) = c;
-            }
-        }
-    } else {
-        for (int i = 0; i < im->height; ++i) {
-            for (int j = 0; j < im->width; ++j) {
-                rgbaList.at(4 * (i * im->width + j) + 3) = 255U;
             }
         }
     }
