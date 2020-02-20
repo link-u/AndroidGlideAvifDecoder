@@ -41,12 +41,13 @@ class Avif(inputStream: InputStream) {
             return buffer.toByteArray()
         }
 
-        // Used to load the 'native-lib' library on application startup.
         init {
-            System.loadLibrary("dav1d")
-            System.loadLibrary("avif")
-            System.loadLibrary("yuv")
-            System.loadLibrary("avif_decoder")
+            if (AvifDecoder.available()) {
+                System.loadLibrary("dav1d")
+                System.loadLibrary("avif")
+                System.loadLibrary("yuv")
+                System.loadLibrary("avif_decoder")
+            }
         }
     }
 }

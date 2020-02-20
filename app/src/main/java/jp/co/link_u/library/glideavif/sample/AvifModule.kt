@@ -12,12 +12,14 @@ import java.io.InputStream
 @GlideModule
 class AvifModule : AppGlideModule() {
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
-        registry
-            .append(
-                InputStream::class.java,
-                Bitmap::class.java,
-                AvifDecoder()
-            )
+        if (AvifDecoder.available()) {
+            registry
+                .append(
+                    InputStream::class.java,
+                    Bitmap::class.java,
+                    AvifDecoder()
+                )
+        }
     }
 
     // Disable manifest parsing to avoid adding similar modules twice.

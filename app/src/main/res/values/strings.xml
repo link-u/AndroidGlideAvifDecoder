@@ -2,6 +2,7 @@
     <string name="app_name">AndroidGlideAvifDecoder</string>
     <string name="resource_root">https://raw.githubusercontent.com/link-u/avif-sample-images/master/</string>
     <string-array name="resource_names">
+        <item>fox.png</item>
         <item>fox.profile0.10bpc.yuv420.avif</item>
         <item>fox.profile0.10bpc.yuv420.monochrome.avif</item>
         <item>fox.profile0.10bpc.yuv420.monochrome.odd-height.avif</item>
