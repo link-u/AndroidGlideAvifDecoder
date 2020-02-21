@@ -42,12 +42,10 @@ class Avif(inputStream: InputStream) {
         }
 
         init {
-            if (AvifDecoder.available()) {
-                System.loadLibrary("dav1d")
-                System.loadLibrary("avif")
-                System.loadLibrary("yuv")
-                System.loadLibrary("avif_decoder")
-            }
+            System.loadLibrary("dav1d")
+            System.loadLibrary("avif")
+            System.loadLibrary("yuv")
+            System.loadLibrary("avif_decoder")
         }
     }
 }

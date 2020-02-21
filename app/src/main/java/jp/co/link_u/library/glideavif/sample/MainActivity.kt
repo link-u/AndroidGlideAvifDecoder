@@ -18,7 +18,6 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import jp.co.link_u.library.glideavif.AvifDecoder
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,10 +33,7 @@ class MainActivity : AppCompatActivity() {
         val viewAdapter = MyAdapter(
             requestBuilder,
             resources.getString(R.string.resource_root),
-            if (AvifDecoder.available())
-                images.toList()
-            else
-                images.filter { name -> !name.endsWith("avif") }
+            images.toList()
         )
 
         findViewById<RecyclerView>(R.id.image_list).apply {

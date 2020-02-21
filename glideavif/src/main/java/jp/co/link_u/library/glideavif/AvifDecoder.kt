@@ -1,7 +1,6 @@
 package jp.co.link_u.library.glideavif
 
 import android.graphics.Bitmap
-import android.os.Build
 import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.ResourceDecoder
 import com.bumptech.glide.load.engine.Resource
@@ -25,13 +24,6 @@ class AvifDecoder : ResourceDecoder<InputStream, Bitmap> {
             return SimpleResource(avif.bitmap)
         } catch (ex: Throwable) {
             throw IOException("Cannot load Avif from stream", ex)
-        }
-    }
-
-    companion object {
-        fun available(): Boolean {
-            return Build.VERSION.SDK_INT >= 21 &&
-                    Build.SUPPORTED_ABIS.any { it == "arm64-v8a" }
         }
     }
 }

@@ -1,0 +1,20 @@
+[binaries]
+c = '%TOOLCHAIN_ROOT/bin/%CLANG'
+cpp = '%TOOLCHAIN_ROOT/bin/%CLANG++'
+ar = '%TOOLCHAIN_ROOT/bin/%UTIL-ar'
+as = '%TOOLCHAIN_ROOT/bin/%UTIL-as'
+ld = '%TOOLCHAIN_ROOT/bin/%UTIL-ld'
+strip = '%TOOLCHAIN_ROOT/bin/%UTIL-strip'
+objcopy = '%TOOLCHAIN_ROOT/bin/%UTIL-objcopy'
+pkgconfig = 'false'
+
+[host_machine]
+system = 'android'
+cpu_family = '%CPU_FAMILY'
+cpu = '%CPU'
+endian = 'little'
+
+[properties]
+c_args = ['--sysroot', '%TOOLCHAIN_ROOT/sysroot', '-fPIE', '-fPIC']
+c_link_args = ['-pie']
+cpp_args = ['--sysroot', '%TOOLCHAIN_ROOT/sysroot', '-fPIE', '-fPIC']

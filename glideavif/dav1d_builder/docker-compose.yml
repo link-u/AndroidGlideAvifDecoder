@@ -1,0 +1,54 @@
+---
+version: '3'
+services:
+  arm64-v8a:
+    build:
+      context: docker
+      args:
+        CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
+        UTIL: "%CPU_FAMILY-linux-android"
+        CPU_FAMILY: aarch64
+        CPU: armv8
+        API_LEVEL: 21
+        ARCH: arm64-v8a
+    volumes:
+      - ./build:/mnt/libdav1d
+
+  armeabi-v7a:
+    build:
+      context: docker
+      args:
+        CLANG: "%CPU_FAMILY-linux-androideabi%API_LEVEL-clang"
+        UTIL: arm-linux-androideabi
+        CPU_FAMILY: armv7a
+        CPU: armv7
+        API_LEVEL: 16
+        ARCH: armeabi-v7a
+    volumes:
+      - ./build:/mnt/libdav1d
+
+  x86_64:
+    build:
+      context: docker
+      args:
+        CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
+        UTIL: "%CPU_FAMILY-linux-android"
+        CPU_FAMILY: x86_64
+        CPU: i686
+        API_LEVEL: 21
+        ARCH: x86_64
+    volumes:
+      - ./build:/mnt/libdav1d
+
+  x86:
+    build:
+      context: docker
+      args:
+        CLANG: "%CPU-linux-android%API_LEVEL-clang"
+        UTIL: "%CPU-linux-android"
+        CPU_FAMILY: x86
+        CPU: i686
+        API_LEVEL: 16
+        ARCH: x86
+    volumes:
+      - ./build:/mnt/libdav1d
