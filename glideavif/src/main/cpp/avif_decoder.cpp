@@ -210,7 +210,6 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
                 break;
             case 10:
             case 12:
-                // FIXME(ledyba-z): avifImageYUVToRGBがMonochromeを一切考慮していない
                 result = avifImageYUVToRGB(im);
                 if (result != AVIF_RESULT_OK) {
                     throwException(env, "convert high bit-depth limited yuv to rgb with libavif failed");
