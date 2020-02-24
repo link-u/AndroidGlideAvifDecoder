@@ -7,8 +7,23 @@
 #include "common.hpp"
 #include "my_bitmap.hpp"
 
+struct AvifDecoderDestroyer final {
+    void operator()(avifDecoder* decoder) noexcept {
+        avifDecoderDestroy(decoder);
+    }
+};
+using avifDecoderPtr = std::unique_ptr<avifDecoder, AvifDecoderDestroyer>;
+
+struct AvifImageDestroyer final {
+    void operator()(avifImage* img) noexcept {
+        avifImageDestroy(img);
+    }
+};
+using avifImagePtr = std::unique_ptr<avifImage, AvifImageDestroyer>;
+
+
 template<typename T>
-void copyColorPixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
+void copyColorPixels(JNIEnv *env, avifImagePtr const& im, std::vector<uint8_t> &rgbaList) {
     uint32_t w = im->width * sizeof(T) / sizeof(uint8_t);
     if (im->rgbRowBytes[0] != w || im->rgbRowBytes[1] != w || im->rgbRowBytes[2] != w) {
         throwException(env, "invalid rgb bytes");
@@ -31,7 +46,7 @@ void copyColorPixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList)
 }
 
 template<typename T>
-void copyGrayscalePixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
+void copyGrayscalePixels(JNIEnv *env, avifImagePtr const& im, std::vector<uint8_t> &rgbaList) {
     uint32_t w = im->width * sizeof(T) / sizeof(uint8_t);
     if (im->yuvRowBytes[0] < w) {
         throwException(env, "invalid yuv bytes");
@@ -47,33 +62,11 @@ void copyGrayscalePixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaL
     }
 }
 
-bool isGrayscale(avifImage *im) {
+bool isGrayscale(avifImagePtr const& im) {
     return !(im->yuvRowBytes[1] && im->yuvRowBytes[2]);
 }
 
-class AvifDecoder {
-public:
-    AvifDecoder() {
-        decoder = avifDecoderCreate();
-    }
-
-    ~AvifDecoder() noexcept {
-        avifDecoderDestroy(decoder);
-    }
-
-    avifDecoder *getDecoder() {
-        return decoder;
-    }
-
-    AvifDecoder(const AvifDecoder &) = delete;
-
-    AvifDecoder &operator=(const AvifDecoder &) = delete;
-
-private:
-    avifDecoder *decoder;
-};
-
-int (*getYUVConvertFunc(avifImage *im))
+int (*getYUVConvertFunc(avifImagePtr const& im))
         (const uint8_t *src_y, int src_stride_y,
          const uint8_t *src_u, int src_stride_u,
          const uint8_t *src_v, int src_stride_v,
@@ -123,7 +116,7 @@ int (*getYUVConvertFunc(avifImage *im))
             return nullptr;
     }
 }
-void convert8bitLimitedYUVTORGB(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
+void convert8bitLimitedYUVTORGB(JNIEnv *env, avifImagePtr const& im, std::vector<uint8_t> &rgbaList) {
     if (isGrayscale(im)) {
         auto result = libyuv::I400ToARGB(im->yuvPlanes[0], im->yuvRowBytes[0],
                                          rgbaList.data(), im->width * 4,
@@ -145,7 +138,7 @@ void convert8bitLimitedYUVTORGB(JNIEnv *env, avifImage *im, std::vector<uint8_t>
             throwException(env, "convert 8bpc limited yuv to rgb with libyuv failed");
         }
     } else {
-        auto result = avifImageYUVToRGB(im);
+        auto result = avifImageYUVToRGB(im.get());
         if (result != AVIF_RESULT_OK) {
             throwException(env, "convert 8bpc limited yuv to rgb with libavif failed");
         }
@@ -160,23 +153,22 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
         throwException(env, "allocation failed");
     }
 
-    avifROData raw;
+    avifROData raw{};
     raw.data = (const uint8_t *) source.elements();
     raw.size = (size_t) sourceDataLength;
 
-    AvifDecoder ad;
-    auto decoder = ad.getDecoder();
-    auto result = avifDecoderParse(decoder, &raw);
+    avifDecoderPtr decoder(avifDecoderCreate());
+    auto result = avifDecoderParse(decoder.get(), &raw);
     if (result != AVIF_RESULT_OK) {
         throwException(env, "parse failed");
     }
 
-    result = avifDecoderNextImage(decoder);
+    result = avifDecoderNextImage(decoder.get());
     if (result != AVIF_RESULT_OK) {
         throwException(env, "decode failed");
     }
 
-    auto im = decoder->image;
+    avifImagePtr im(decoder->image);
     std::vector<uint8_t> rgbaList(im->width * im->height * 4);
 
     if(im->nclx.fullRangeFlag) {
@@ -196,7 +188,7 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
                     throwException(env, "unknown color depth");
             }
         } else {
-            result = avifImageYUVToRGB(im);
+            result = avifImageYUVToRGB(im.get());
             if (result != AVIF_RESULT_OK) {
                 throwException(env, "convert 8bpc full yuv to rgb with libavif failed");
             }
@@ -210,7 +202,7 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
                 break;
             case 10:
             case 12:
-                result = avifImageYUVToRGB(im);
+                result = avifImageYUVToRGB(im.get());
                 if (result != AVIF_RESULT_OK) {
                     throwException(env, "convert high bit-depth limited yuv to rgb with libavif failed");
                 }
