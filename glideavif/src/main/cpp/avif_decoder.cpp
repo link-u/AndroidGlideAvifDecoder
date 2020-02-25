@@ -111,7 +111,7 @@ int (*getYUVConvertFunc(avifImage *im))
     }
 }
 
-void convert8bitLimitedYUVTORGB(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
+void convertYUVWithLibYUV(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
     if (isGrayscale(im)) {
         auto result = libyuv::I400ToARGB(im->yuvPlanes[0], im->yuvRowBytes[0],
                                          rgbaList.data(), im->width * 4,
@@ -121,6 +121,7 @@ void convert8bitLimitedYUVTORGB(JNIEnv *env, avifImage *im, std::vector<uint8_t>
         }
         return;
     }
+
     auto convertYUV = getYUVConvertFunc(im);
     if (convertYUV) {
         auto result = convertYUV(
@@ -166,49 +167,46 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
     avifImage *im = decoder->image;
     std::vector<uint8_t> rgbaList(im->width * im->height * 4);
 
-    if (im->nclx.fullRangeFlag) {
-        if (isGrayscale(im)) {
+    [&] {
+        if (im->nclx.fullRangeFlag && isGrayscale(im)) {
             // fullRangeかつGrayscaleの時だけは、Yの値をそのままコピーしてよい
             // FIXME(ledyba-z):
             //  transferCharacteristicsとmatrixCoefficientsの組み合わせによっては駄目な可能性がある
             switch (im->depth) {
                 case 8:
                     copyGrayscalePixels<uint8_t>(env, im, rgbaList);
-                    break;
+                    return;
                 case 10:
                 case 12:
                     copyGrayscalePixels<uint16_t>(env, im, rgbaList);
-                    break;
+                    return;
                 default:
                     throwException(env, "unknown color depth");
             }
-        } else {
-            result = avifImageYUVToRGB(im);
-            if (result != AVIF_RESULT_OK) {
-                throwException(env, "convert 8bpc full yuv to rgb with libavif failed");
-            }
-
-            copyColorPixels<uint16_t>(env, im, rgbaList);
         }
-    } else {
+
+        if (!im->nclx.fullRangeFlag && im->depth == 8) {
+            // libyuv は8bitかつlimited rangeにのみ対応
+            convertYUVWithLibYUV(env, im, rgbaList);
+            return;
+        }
+
+        result = avifImageYUVToRGB(im);
+        if (result != AVIF_RESULT_OK) {
+            throwException(env, "convert yuv to rgb with libavif failed");
+        }
         switch (im->depth) {
             case 8:
-                convert8bitLimitedYUVTORGB(env, im, rgbaList);
-                break;
+                copyColorPixels<uint8_t>(env, im, rgbaList);
+                return;
             case 10:
             case 12:
-                result = avifImageYUVToRGB(im);
-                if (result != AVIF_RESULT_OK) {
-                    throwException(env,
-                                   "convert high bit-depth limited yuv to rgb with libavif failed");
-                }
-
                 copyColorPixels<uint16_t>(env, im, rgbaList);
-                break;
+                return;
             default:
                 throwException(env, "unknown color depth");
         }
-    }
+    }();
 
     if (im->alphaPlane) {
         for (int i = 0; i < im->height; ++i) {
