@@ -4,10 +4,15 @@ add_library(avif_decoder SHARED common.cpp avif_decoder.cpp my_bitmap.cpp)
 
 find_library(log-lib log)
 
-add_library(dav1d SHARED IMPORTED)
-set_target_properties(dav1d PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${ANDROID_ABI}/libdav1d.so)
+set(DAV1D_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(DAV1D_INCLUDES ${DAV1D_DIR}/include)
+set(DAV1D_LIBS ${DAV1D_DIR}/lib/${ANDROID_ABI})
 
-include_directories(include)
+add_library(dav1d SHARED IMPORTED)
+set_target_properties(dav1d PROPERTIES IMPORTED_LOCATION ${DAV1D_LIBS}/libdav1d.so)
+include_directories(${DAV1D_INCLUDES})
+set(DAV1D_LIBRARY dav1d)
+
 include_directories(jni_util/include)
 
 # libavif
