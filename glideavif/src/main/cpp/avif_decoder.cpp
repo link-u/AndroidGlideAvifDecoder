@@ -8,10 +8,11 @@
 #include "my_bitmap.hpp"
 
 struct AvifDecoderDestroyer final {
-    void operator()(avifDecoder* decoder) noexcept {
+    void operator()(avifDecoder *decoder) noexcept {
         avifDecoderDestroy(decoder);
     }
 };
+
 using avifDecoderPtr = std::unique_ptr<avifDecoder, AvifDecoderDestroyer>;
 
 
@@ -92,23 +93,24 @@ int (*getYUVConvertFunc(avifImage *im))
                     return nullptr;
             }
             break;
-       case AVIF_NCLX_MATRIX_COEFFICIENTS_BT2020_NCL:
-           switch (im->yuvFormat) {
-               case AVIF_PIXEL_FORMAT_YUV420:
-                   return libyuv::U420ToABGR;
-               case AVIF_PIXEL_FORMAT_YUV422:
-                   return libyuv::U422ToABGR;
-               case AVIF_PIXEL_FORMAT_YUV444:
-                   return libyuv::U444ToABGR;
-               default:
-                   return nullptr;
-           }
-           break;
+        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT2020_NCL:
+            switch (im->yuvFormat) {
+                case AVIF_PIXEL_FORMAT_YUV420:
+                    return libyuv::U420ToABGR;
+                case AVIF_PIXEL_FORMAT_YUV422:
+                    return libyuv::U422ToABGR;
+                case AVIF_PIXEL_FORMAT_YUV444:
+                    return libyuv::U444ToABGR;
+                default:
+                    return nullptr;
+            }
+            break;
         default:
             // 他のColorMatrixはlibyuvは現在非対応
             return nullptr;
     }
 }
+
 void convert8bitLimitedYUVTORGB(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
     if (isGrayscale(im)) {
         auto result = libyuv::I400ToARGB(im->yuvPlanes[0], im->yuvRowBytes[0],
@@ -161,10 +163,10 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
         throwException(env, "decode failed");
     }
 
-    avifImage* im = decoder->image;
+    avifImage *im = decoder->image;
     std::vector<uint8_t> rgbaList(im->width * im->height * 4);
 
-    if(im->nclx.fullRangeFlag) {
+    if (im->nclx.fullRangeFlag) {
         if (isGrayscale(im)) {
             // fullRangeかつGrayscaleの時だけは、Yの値をそのままコピーしてよい
             // FIXME(ledyba-z):
@@ -197,7 +199,8 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
             case 12:
                 result = avifImageYUVToRGB(im);
                 if (result != AVIF_RESULT_OK) {
-                    throwException(env, "convert high bit-depth limited yuv to rgb with libavif failed");
+                    throwException(env,
+                                   "convert high bit-depth limited yuv to rgb with libavif failed");
                 }
 
                 copyColorPixels<uint16_t>(env, im, rgbaList);
