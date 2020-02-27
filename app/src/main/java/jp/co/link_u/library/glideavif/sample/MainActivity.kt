@@ -66,9 +66,11 @@ class MainActivity : AppCompatActivity() {
             val name = images[position]
 
             holder.textView.text = name.split(".").joinToString("\n")
+
+            val time = System.currentTimeMillis();
             requestBuilder
                 .skipMemoryCache(true)
-                .listener(LogListener(name))
+                .listener(LogListener(name, time))
                 .load(resourceRoot + name)
                 .into(holder.imageView)
         }
@@ -76,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         override fun getItemCount() = images.size
     }
 
-    class LogListener(val name: String) : RequestListener<Drawable> {
+    class LogListener(val name: String, val time: Long) : RequestListener<Drawable> {
         override fun onLoadFailed(
             e: GlideException?,
             model: Any?,
@@ -93,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             dataSource: DataSource?,
             isFirstResource: Boolean
         ): Boolean {
-            Log.d("AvifDecoder", name)
+            Log.d("AvifDecoder", "took ${System.currentTimeMillis() - time}ms on ${name}")
             return false
         }
     }
