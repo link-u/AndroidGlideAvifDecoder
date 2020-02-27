@@ -3,6 +3,7 @@
     <words>
       <w>avif</w>
       <w>grayscale</w>
+      <w>libyuv</w>
       <w>transcoder</w>
     </words>
   </dictionary>
