@@ -13,7 +13,4 @@
 - I420, I422, I444
 - armv8, armv7, x86, x86_64
 - libyuv (8bitのときのみ)
-
-## 対応していない機能
-
 - limited range
