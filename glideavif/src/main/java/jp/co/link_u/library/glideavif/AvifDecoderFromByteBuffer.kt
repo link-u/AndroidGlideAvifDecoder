@@ -5,25 +5,23 @@ import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.ResourceDecoder
 import com.bumptech.glide.load.engine.Resource
 import com.bumptech.glide.load.resource.SimpleResource
-import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.io.InputStream
+import java.nio.ByteBuffer
 
-class AvifDecoder : ResourceDecoder<InputStream, Bitmap> {
-    override fun handles(source: InputStream, options: Options): Boolean {
+class AvifDecoderFromByteBuffer : ResourceDecoder<ByteBuffer, Bitmap> {
+    override fun handles(source: ByteBuffer, options: Options): Boolean {
         return true
     }
 
     override fun decode(
-        source: InputStream,
+        source: ByteBuffer,
         width: Int,
         height: Int,
         options: Options
     ): Resource<Bitmap>? {
         try {
-            val byteArray = toByteArray(source)
             val bitmap =
-                decodeAvif(byteArray, byteArray.size)
+                decodeAvif(source, source.remaining())
                     ?: throw DecodeException("avif decode failed")
             return SimpleResource(bitmap)
         } catch (ex: Throwable) {
@@ -31,24 +29,9 @@ class AvifDecoder : ResourceDecoder<InputStream, Bitmap> {
         }
     }
 
-    private fun toByteArray(s: InputStream): ByteArray {
-        val buffer = ByteArrayOutputStream()
-
-        val data = ByteArray(16384)
-        while (true) {
-            val nRead = s.read(data, 0, data.size)
-            if (nRead == -1) {
-                break
-            }
-
-            buffer.write(data, 0, nRead)
-        }
-        return buffer.toByteArray()
-    }
-
     private external fun decodeAvif(
-        byteArray: ByteArray,
-        byteArrayLength: Int
+        byteBuffer: ByteBuffer,
+        byteBufferLength: Int
     ): Bitmap?
 
     companion object {

@@ -24,9 +24,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val requestBuilder = Glide.with(this)
+        val requestBuilder = Glide
+            .with(this)
             .asDrawable()
             .transition(withCrossFade())
+            .skipMemoryCache(true)
 
         val viewManager = LinearLayoutManager(this)
         val images = resources.getStringArray(R.array.resource_names)
@@ -67,10 +69,8 @@ class MainActivity : AppCompatActivity() {
 
             holder.textView.text = name.split(".").joinToString("\n")
 
-            val time = System.currentTimeMillis();
             requestBuilder
-                .skipMemoryCache(true)
-                .listener(LogListener(name, time))
+                .listener(LogListener(name, System.currentTimeMillis()))
                 .load(resourceRoot + name)
                 .into(holder.imageView)
         }
@@ -78,7 +78,8 @@ class MainActivity : AppCompatActivity() {
         override fun getItemCount() = images.size
     }
 
-    class LogListener(val name: String, val time: Long) : RequestListener<Drawable> {
+    class LogListener(private val name: String, private val time: Long) :
+        RequestListener<Drawable> {
         override fun onLoadFailed(
             e: GlideException?,
             model: Any?,
@@ -95,7 +96,7 @@ class MainActivity : AppCompatActivity() {
             dataSource: DataSource?,
             isFirstResource: Boolean
         ): Boolean {
-            Log.d("AvifDecoder", "took ${System.currentTimeMillis() - time}ms on ${name}")
+            Log.d("AvifDecoder", "took ${System.currentTimeMillis() - time}ms on $name")
             return false
         }
     }

@@ -143,14 +143,9 @@ void convertYUVWithLibYUV(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgba
     }
 }
 
-jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
-    jni_util::CopiedArrayAccess<jbyte> source(env, sourceData, JNI_ABORT);
-    if (source.elements() == nullptr) {
-        throwException(env, "allocation failed");
-    }
-
+jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength) {
     avifROData raw{};
-    raw.data = (const uint8_t *) source.elements();
+    raw.data = sourceData;
     raw.size = (size_t) sourceDataLength;
 
     avifDecoderPtr decoder(avifDecoderCreate());
@@ -223,14 +218,39 @@ jobject decodeAvif(JNIEnv *env, jbyteArray sourceData, int sourceDataLength) {
 }
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_jp_co_link_1u_library_glideavif_Avif_decodeAvif(
+Java_jp_co_link_1u_library_glideavif_AvifDecoder_decodeAvif(
         JNIEnv *env,
         jobject,
         jbyteArray sourceData,
         int sourceDataLength
 ) {
     try {
-        return decodeAvif(env, sourceData, sourceDataLength);
+        jni_util::CopiedArrayAccess<jbyte> source(env, sourceData, JNI_ABORT);
+        if (source.elements() == nullptr) {
+            throwException(env, "allocation failed");
+        }
+
+        return decodeAvif(env, (const uint8_t *) source.elements(), sourceDataLength);
+    }
+    catch (const std::exception &e) {
+        return nullptr;
+    }
+}
+
+extern "C" JNIEXPORT jobject JNICALL
+Java_jp_co_link_1u_library_glideavif_AvifDecoderFromByteBuffer_decodeAvif(
+        JNIEnv *env,
+        jobject,
+        jobject sourceData,
+        int sourceDataLength
+) {
+    try {
+        auto buffer = env->GetDirectBufferAddress(sourceData);
+        if (buffer == nullptr) {
+            throwException(env, "allocation failed");
+        }
+
+        return decodeAvif(env, (const uint8_t *) buffer, sourceDataLength);
     }
     catch (const std::exception &e) {
         return nullptr;
