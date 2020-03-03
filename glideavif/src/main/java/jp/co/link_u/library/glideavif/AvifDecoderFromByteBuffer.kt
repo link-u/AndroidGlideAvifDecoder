@@ -49,9 +49,6 @@ class AvifDecoderFromByteBuffer : ResourceDecoder<ByteBuffer, Bitmap> {
 
     companion object {
         init {
-            System.loadLibrary("dav1d")
-            System.loadLibrary("avif")
-            System.loadLibrary("yuv")
             System.loadLibrary("avif_decoder")
         }
     }

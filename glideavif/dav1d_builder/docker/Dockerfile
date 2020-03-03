@@ -35,9 +35,10 @@ RUN sed -i  \
     -e "s/%API_LEVEL/${API_LEVEL}/" \
     -e 's/%TOOLCHAIN_ROOT/\/usr\/local\/src\/android-ndk\/toolchains\/llvm\/prebuilt\/linux-x86_64/' dav1d_cross.txt
 
+ARG LIBTYPE
 RUN /root/.local/bin/meson .. \
     --cross-file dav1d_cross.txt \
-    --default-library shared \
+    --default-library ${LIBTYPE} \
     --buildtype release && \
     ninja
 

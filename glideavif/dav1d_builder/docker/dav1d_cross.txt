@@ -15,6 +15,6 @@ cpu = '%CPU'
 endian = 'little'
 
 [properties]
-c_args = ['--sysroot', '%TOOLCHAIN_ROOT/sysroot', '-fPIE', '-fPIC']
+c_args = ['--sysroot', '%TOOLCHAIN_ROOT/sysroot', '-fPIE', '-fPIC', '-fdata-sections', '-ffunction-sections']
 c_link_args = ['-pie']
-cpp_args = ['--sysroot', '%TOOLCHAIN_ROOT/sysroot', '-fPIE', '-fPIC']
+cpp_args = ['--sysroot', '%TOOLCHAIN_ROOT/sysroot', '-fPIE', '-fPIC', '-fdata-sections', '-ffunction-sections']
