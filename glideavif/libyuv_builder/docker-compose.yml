@@ -1,0 +1,38 @@
+---
+version: '3'
+services:
+  arm64-v8a:
+    build:
+      context: docker
+      args:
+        API_LEVEL: 21
+        ARCH: arm64-v8a
+    volumes:
+      - ./build:/mnt/libyuv
+
+  armeabi-v7a:
+    build:
+      context: docker
+      args:
+        API_LEVEL: 16
+        ARCH: armeabi-v7a
+    volumes:
+      - ./build:/mnt/libyuv
+
+  x86_64:
+    build:
+      context: docker
+      args:
+        API_LEVEL: 21
+        ARCH: x86_64
+    volumes:
+      - ./build:/mnt/libyuv
+
+  x86:
+    build:
+      context: docker
+      args:
+        API_LEVEL: 16
+        ARCH: x86
+    volumes:
+      - ./build:/mnt/libyuv
