@@ -4,6 +4,5 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/glideavif/src/main/cpp/jni_util" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/glideavif/src/main/cpp/libavif" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/glideavif/src/main/cpp/libyuv" vcs="Git" />
   </component>
 </project>
