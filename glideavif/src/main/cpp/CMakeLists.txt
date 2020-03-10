@@ -24,7 +24,7 @@ set(DAV1D_LIBRARY dav1d)
 set(AVIF_CODEC_DAV1D ON CACHE BOOL "Use the dav1d codec for decoding (overrides AOM decoding if also enabled)" FORCE)
 add_subdirectory(libavif EXCLUDE_FROM_ALL)
 
-add_library(avif_decoder SHARED common.cpp avif_decoder.cpp my_bitmap.cpp)
+add_library(avif_decoder SHARED common.cpp avif_decoder.cpp my_bitmap.cpp avif_wrapper.cpp)
 
 find_library(log-lib log)
 

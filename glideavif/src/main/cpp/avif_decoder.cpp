@@ -6,38 +6,7 @@
 
 #include "common.hpp"
 #include "my_bitmap.hpp"
-
-struct AvifDecoderDestroyer final {
-    void operator()(avifDecoder *decoder) noexcept {
-        avifDecoderDestroy(decoder);
-    }
-};
-
-using avifDecoderPtr = std::unique_ptr<avifDecoder, AvifDecoderDestroyer>;
-
-
-template<typename T>
-void copyColorPixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
-    uint32_t w = im->width * sizeof(T) / sizeof(uint8_t);
-    if (im->rgbRowBytes[0] != w || im->rgbRowBytes[1] != w || im->rgbRowBytes[2] != w) {
-        throwException(env, "invalid rgb bytes");
-    }
-
-    for (int k = 0; k < 3; ++k) {
-        for (int i = 0; i < im->height; ++i) {
-            auto p = (T *) (im->rgbPlanes[k] + (i * im->rgbRowBytes[k]));
-            for (int j = 0; j < im->width; ++j) {
-                rgbaList.at(4 * (i * im->width + j) + k) = (uint8_t) (p[j] >> (im->depth - 8));
-            }
-        }
-    }
-
-    for (int i = 0; i < im->height; ++i) {
-        for (int j = 0; j < im->width; ++j) {
-            rgbaList.at(4 * (i * im->width + j) + 3) = 0xff;
-        }
-    }
-}
+#include "avif_wrapper.hpp"
 
 template<typename T>
 void copyGrayscalePixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
@@ -111,38 +80,6 @@ int (*getYUVConvertFunc(avifImage *im))
     }
 }
 
-void convertYUVWithLibYUV(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
-    if (isGrayscale(im)) {
-        auto result = libyuv::I400ToARGB(im->yuvPlanes[0], im->yuvRowBytes[0],
-                                         rgbaList.data(), im->width * 4,
-                                         im->width, im->height);
-        if (result != 0) {
-            throwException(env, "convert yuv to rgb with libyuv failed");
-        }
-        return;
-    }
-
-    auto convertYUV = getYUVConvertFunc(im);
-    if (convertYUV) {
-        auto result = convertYUV(
-                im->yuvPlanes[0], im->yuvRowBytes[0],
-                im->yuvPlanes[1], im->yuvRowBytes[1],
-                im->yuvPlanes[2], im->yuvRowBytes[2],
-                rgbaList.data(), im->width * 4,
-                im->width, im->height);
-        if (result != 0) {
-            throwException(env, "convert 8bpc limited yuv to rgb with libyuv failed");
-        }
-    } else {
-        auto result = avifImageYUVToRGB(im);
-        if (result != AVIF_RESULT_OK) {
-            throwException(env, "convert 8bpc limited yuv to rgb with libavif failed");
-        }
-
-        copyColorPixels<uint8_t>(env, im, rgbaList);
-    }
-}
-
 jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength) {
     avifROData raw{};
     raw.data = sourceData;
@@ -182,25 +119,51 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
 
         if (!im->nclx.fullRangeFlag && im->depth == 8) {
             // libyuv は8bitかつlimited rangeにのみ対応
-            convertYUVWithLibYUV(env, im, rgbaList);
-            return;
+            if (isGrayscale(im)) {
+                auto result = libyuv::I400ToARGB(im->yuvPlanes[0], im->yuvRowBytes[0],
+                                                 rgbaList.data(), im->width * 4,
+                                                 im->width, im->height);
+                if (result != 0) {
+                    throwException(env, "convert yuv to rgb with libyuv failed");
+                }
+                return;
+            }
+
+            auto convertYUV = getYUVConvertFunc(im);
+            if (convertYUV) {
+                auto result = convertYUV(
+                        im->yuvPlanes[0], im->yuvRowBytes[0],
+                        im->yuvPlanes[1], im->yuvRowBytes[1],
+                        im->yuvPlanes[2], im->yuvRowBytes[2],
+                        rgbaList.data(), im->width * 4,
+                        im->width, im->height);
+                if (result != 0) {
+                    throwException(env, "convert 8bpc limited yuv to rgb with libyuv failed");
+                }
+                return;
+            }
         }
 
-        result = avifImageYUVToRGB(im);
-        if (result != AVIF_RESULT_OK) {
-            throwException(env, "convert yuv to rgb with libavif failed");
+        auto rgb = avifRGBImagePtr(new avifRGBImage);
+        avifRGBImageSetDefaults(rgb.get(), im);
+        rgb->format = AVIF_RGB_FORMAT_RGBA;
+        rgb->depth = 8;
+
+        avifRGBImageAllocatePixels(rgb.get());
+        avifImageYUVToRGB(im, rgb.get());
+        if (rgbaList.size() != rgb->rowBytes * rgb->height) {
+            throwException(env, "invalid size");
         }
-        switch (im->depth) {
-            case 8:
-                copyColorPixels<uint8_t>(env, im, rgbaList);
-                return;
-            case 10:
-            case 12:
-                copyColorPixels<uint16_t>(env, im, rgbaList);
-                return;
-            default:
-                throwException(env, "unknown color depth");
+        memcpy(rgbaList.data(), rgb->pixels, rgb->rowBytes * rgb->height);
+
+        if (!im->alphaPlane) {
+            for (int i = 0; i < im->height; ++i) {
+                for (int j = 0; j < im->width; ++j) {
+                    rgbaList.at(4 * (i * im->width + j) + 3) = 0xff;
+                }
+            }
         }
+        return;
     }();
 
     if (im->alphaPlane) {
