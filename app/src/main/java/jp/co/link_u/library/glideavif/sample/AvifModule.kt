@@ -16,11 +16,6 @@ import java.nio.ByteBuffer
 class AvifModule : AppGlideModule() {
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
         registry
-//            .append(
-//                InputStream::class.java,
-//                Bitmap::class.java,
-//                AvifDecoder()
-//            )
             .prepend(
                 ByteBuffer::class.java,
                 Bitmap::class.java,

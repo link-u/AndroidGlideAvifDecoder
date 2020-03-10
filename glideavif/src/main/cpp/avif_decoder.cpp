@@ -181,26 +181,6 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
 }
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_jp_co_link_1u_library_glideavif_AvifDecoder_decodeAvif(
-        JNIEnv *env,
-        jobject,
-        jbyteArray sourceData,
-        int sourceDataLength
-) {
-    try {
-        jni_util::CopiedArrayAccess<jbyte> source(env, sourceData, JNI_ABORT);
-        if (source.elements() == nullptr) {
-            throwException(env, "allocation failed");
-        }
-
-        return decodeAvif(env, (const uint8_t *) source.elements(), sourceDataLength);
-    }
-    catch (const std::exception &e) {
-        return nullptr;
-    }
-}
-
-extern "C" JNIEXPORT jobject JNICALL
 Java_jp_co_link_1u_library_glideavif_AvifDecoderFromByteBuffer_decodeAvif(
         JNIEnv *env,
         jobject,
