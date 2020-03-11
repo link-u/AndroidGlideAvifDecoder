@@ -1,18 +1,22 @@
 FROM debian:buster
 
-ADD https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip /usr/local/src/android-ndk-r20-linux-x86_64.zip
-
-RUN apt-get update \
-    && apt-get install -y \
-        cmake ninja-build git nasm unzip
+RUN apt-get update && \
+    apt-get install -y \
+        cmake curl ninja-build git nasm unzip
 
 WORKDIR /usr/local/src
 
-RUN unzip android-ndk-r20-linux-x86_64.zip && mv android-ndk-r20b android-ndk
+RUN curl -SL https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip > android-ndk-r20-linux-x86_64.zip && \
+    unzip -q android-ndk-r20-linux-x86_64.zip && \
+    mv android-ndk-r20b android-ndk && \
+    rm android-ndk-r20-linux-x86_64.zip
 
 ## libyuv
+ARG YUV_VERSION
 
-RUN git clone -b master https://chromium.googlesource.com/libyuv/libyuv libyuv && \
+RUN git clone https://chromium.googlesource.com/libyuv/libyuv libyuv && \
+    cd libyuv && \
+    git reset --hard ${YUV_VERSION} && \
     mkdir -p /usr/local/src/libyuv/build
 
 WORKDIR /usr/local/src/libyuv/build

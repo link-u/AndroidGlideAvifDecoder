@@ -5,6 +5,7 @@ services:
     build:
       context: docker
       args:
+        DAV1D_VERSION: 0.6.0
         CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
         UTIL: "%CPU_FAMILY-linux-android"
         CPU_FAMILY: aarch64
@@ -19,6 +20,7 @@ services:
     build:
       context: docker
       args:
+        DAV1D_VERSION: 0.6.0
         CLANG: "%CPU_FAMILY-linux-androideabi%API_LEVEL-clang"
         UTIL: arm-linux-androideabi
         CPU_FAMILY: armv7a
@@ -33,6 +35,7 @@ services:
     build:
       context: docker
       args:
+        DAV1D_VERSION: 0.6.0
         CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
         UTIL: "%CPU_FAMILY-linux-android"
         CPU_FAMILY: x86_64
@@ -47,6 +50,7 @@ services:
     build:
       context: docker
       args:
+        DAV1D_VERSION: 0.6.0
         CLANG: "%CPU-linux-android%API_LEVEL-clang"
         UTIL: "%CPU-linux-android"
         CPU_FAMILY: x86

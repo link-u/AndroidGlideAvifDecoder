@@ -5,6 +5,7 @@ services:
     build:
       context: docker
       args:
+        YUV_VERSION: 45f1f2b201672b699b35da20267a5f2c41318264
         API_LEVEL: 21
         ARCH: arm64-v8a
     volumes:
@@ -14,6 +15,7 @@ services:
     build:
       context: docker
       args:
+        YUV_VERSION: 45f1f2b201672b699b35da20267a5f2c41318264
         API_LEVEL: 16
         ARCH: armeabi-v7a
     volumes:
@@ -23,6 +25,7 @@ services:
     build:
       context: docker
       args:
+        YUV_VERSION: 45f1f2b201672b699b35da20267a5f2c41318264
         API_LEVEL: 21
         ARCH: x86_64
     volumes:
@@ -32,6 +35,7 @@ services:
     build:
       context: docker
       args:
+        YUV_VERSION: 45f1f2b201672b699b35da20267a5f2c41318264
         API_LEVEL: 16
         ARCH: x86
     volumes:
