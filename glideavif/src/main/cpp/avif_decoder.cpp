@@ -3,6 +3,7 @@
 #include <avif/avif.h>
 #include <jni_util.hpp>
 #include <libyuv/convert_argb.h>
+#include <algorithm>
 
 #include "common.hpp"
 #include "my_bitmap.hpp"
@@ -21,6 +22,26 @@ void copyGrayscalePixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaL
         for (int j = 0; j < im->width; ++j) {
             uint32_t c0 = p[j] >> (im->depth - 8);
             array[i * im->width + j] = 0xff000000 | (c0 << 16U) | (c0 << 8U) | c0;
+        }
+    }
+}
+
+template<typename T>
+void
+copyAlphaPixels(JNIEnv *env, avifImage *im, bool limitedRange, std::vector<uint8_t> &rgbaList) {
+    uint32_t w = im->width * sizeof(T) / sizeof(uint8_t);
+    if (im->alphaRowBytes < w) {
+        throwException(env, "invalid alpha bytes");
+    }
+
+    for (int i = 0; i < im->height; ++i) {
+        auto p = (T *) (im->alphaPlane + (i * im->alphaRowBytes));
+        for (int j = 0; j < im->width; ++j) {
+            uint32_t c0 = p[j] >> (im->depth - 8);
+            if (limitedRange) {
+                c0 = std::max<uint32_t>(std::min<uint32_t>((c0 - 16) * 255 / (235 - 16), 255), 0);
+            }
+            rgbaList.at(4 * (i * im->width + j) + 3) = (uint8_t) c0;
         }
     }
 }
@@ -156,6 +177,7 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
         }
         memcpy(rgbaList.data(), rgb->pixels, rgb->rowBytes * rgb->height);
 
+        // On non-alpha image, A of RGBA is decoded 0x00
         if (!im->alphaPlane) {
             for (int i = 0; i < im->height; ++i) {
                 for (int j = 0; j < im->width; ++j) {
@@ -167,11 +189,25 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
     }();
 
     if (im->alphaPlane) {
-        for (int i = 0; i < im->height; ++i) {
-            for (int j = 0; j < im->width; ++j) {
-                uint8_t c = im->alphaPlane[i * im->alphaRowBytes + j];
-                rgbaList.at(4 * (i * im->width + j) + 3) = c;
-            }
+        bool limitedRange = false;
+        switch (im->alphaRange) {
+            case AVIF_RANGE_LIMITED:
+                limitedRange = true;
+                break;
+            case AVIF_RANGE_FULL:
+                limitedRange = false;
+                break;
+        }
+        switch (im->depth) {
+            case 8:
+                copyAlphaPixels<uint8_t>(env, im, limitedRange, rgbaList);
+                break;
+            case 10:
+            case 12:
+                copyAlphaPixels<uint16_t>(env, im, limitedRange, rgbaList);
+                break;
+            default:
+                throwException(env, "unknown color depth");
         }
     }
 
