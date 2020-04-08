@@ -1,2 +1,2 @@
-include ':app', ':glideavif'
+include ':app', ':glideavif', ':benchmark'
 rootProject.name='AndroidGlideAvifDecoder'
