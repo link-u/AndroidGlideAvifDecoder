@@ -23,6 +23,7 @@ class AvifDecoderFromByteBuffer : ResourceDecoder<ByteBuffer, Bitmap> {
             throw DecodeException("Buffer must be DirectByteBuffer")
         }
 
+        LibraryLoader
         try {
             val bitmap =
                 decodeAvif(source, source.remaining())
@@ -51,7 +52,7 @@ class AvifDecoderFromByteBuffer : ResourceDecoder<ByteBuffer, Bitmap> {
         byteBufferLength: Int
     ): Bitmap?
 
-    companion object {
+    object LibraryLoader {
         init {
             System.loadLibrary("avif_decoder")
         }
