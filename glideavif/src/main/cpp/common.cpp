@@ -4,7 +4,11 @@
 
 #include "common.hpp"
 
-void throwException(JNIEnv *env, const char *mes) {
-    jni_util::throwRuntimeException(env, mes);
-    throw std::runtime_error(mes);
+void throwRuntimeException(JNIEnv *env, const char *what) {
+    jclass classj = env->FindClass("java/lang/RuntimeException");
+    if (classj == nullptr)
+        return;
+
+    env->ThrowNew(classj, what);
+    env->DeleteLocalRef(classj);
 }

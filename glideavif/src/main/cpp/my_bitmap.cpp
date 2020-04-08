@@ -65,27 +65,27 @@ MyBitmap::MyBitmap(JNIEnv *env, int width, int height) {
     this->jbitmap = createBitmap(env, width, height);
 
     if (AndroidBitmap_getInfo(env, jbitmap, &this->info) != ANDROID_BITMAP_RESULT_SUCCESS) {
-        throwException(env, "get info from bitmap failed");
+        throw std::runtime_error("get info from bitmap failed");
     }
 
     if (this->info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
-        throwException(env, "invalid bitmap format");
+        throw std::runtime_error("invalid bitmap format");
     }
 }
 
 void MyBitmap::Load(const std::vector<uint8_t> &rgbaList) {
     if (info.stride * info.height != rgbaList.size()) {
-        throwException(env, "invalid array size");
+        throw std::runtime_error("invalid array size");
     }
 
     void *ptr;
     if (AndroidBitmap_lockPixels(env, jbitmap, &ptr) < 0) {
-        throwException(env, "lock bitmap failed");
+        throw std::runtime_error("lock bitmap failed");
     }
 
     memcpy(ptr, (void *) rgbaList.data(), rgbaList.size());
 
     if (AndroidBitmap_unlockPixels(env, jbitmap) < 0) {
-        throwException(env, "unlock bitmap failed");
+        throw std::runtime_error("unlock bitmap failed");
     }
 }

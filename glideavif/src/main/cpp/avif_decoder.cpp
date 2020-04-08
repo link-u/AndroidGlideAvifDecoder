@@ -1,7 +1,6 @@
 #include <jni.h>
 #include <string>
 #include <avif/avif.h>
-#include <jni_util.hpp>
 #include <libyuv/convert_argb.h>
 #include <algorithm>
 
@@ -10,10 +9,10 @@
 #include "avif_wrapper.hpp"
 
 template<typename T>
-void copyGrayscalePixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaList) {
+void copyGrayscalePixels(avifImage *im, std::vector<uint8_t> &rgbaList) {
     uint32_t w = im->width * sizeof(T) / sizeof(uint8_t);
     if (im->yuvRowBytes[0] < w) {
-        throwException(env, "invalid yuv bytes");
+        throw std::runtime_error("invalid yuv bytes");
     }
 
     auto array = (uint32_t *) rgbaList.data();
@@ -28,10 +27,10 @@ void copyGrayscalePixels(JNIEnv *env, avifImage *im, std::vector<uint8_t> &rgbaL
 
 template<typename T>
 void
-copyAlphaPixels(JNIEnv *env, avifImage *im, bool limitedRange, std::vector<uint8_t> &rgbaList) {
+copyAlphaPixels(avifImage *im, bool limitedRange, std::vector<uint8_t> &rgbaList) {
     uint32_t w = im->width * sizeof(T) / sizeof(uint8_t);
     if (im->alphaRowBytes < w) {
-        throwException(env, "invalid alpha bytes");
+        throw std::runtime_error("invalid alpha bytes");
     }
 
     for (int i = 0; i < im->height; ++i) {
@@ -46,7 +45,7 @@ copyAlphaPixels(JNIEnv *env, avifImage *im, bool limitedRange, std::vector<uint8
     }
 }
 
-bool isGrayscale(avifImage *im) {
+inline bool isGrayscale(avifImage *im) {
     return !(im->yuvRowBytes[1] && im->yuvRowBytes[2]);
 }
 
@@ -109,12 +108,12 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
     avifDecoderPtr decoder(avifDecoderCreate());
     auto result = avifDecoderParse(decoder.get(), &raw);
     if (result != AVIF_RESULT_OK) {
-        throwException(env, "parse failed");
+        throw std::runtime_error("avifDecoderParse failed");
     }
 
     result = avifDecoderNextImage(decoder.get());
     if (result != AVIF_RESULT_OK) {
-        throwException(env, "decode failed");
+        throw std::runtime_error("avifDecoderNextImage failed");
     }
 
     avifImage *im = decoder->image;
@@ -127,39 +126,41 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
             //  transferCharacteristicsとmatrixCoefficientsの組み合わせによっては駄目な可能性がある
             switch (im->depth) {
                 case 8:
-                    copyGrayscalePixels<uint8_t>(env, im, rgbaList);
+                    copyGrayscalePixels<uint8_t>(im, rgbaList);
                     return;
                 case 10:
                 case 12:
-                    copyGrayscalePixels<uint16_t>(env, im, rgbaList);
+                    copyGrayscalePixels<uint16_t>(im, rgbaList);
                     return;
-                default:
-                    throwException(env, "unknown color depth");
+                default: {
+                    throw std::runtime_error("unknown color depth");
+                }
             }
         }
 
         if (!im->nclx.fullRangeFlag && im->depth == 8) {
             // libyuv は8bitかつlimited rangeにのみ対応
             if (isGrayscale(im)) {
-                auto result = libyuv::I400ToARGB(im->yuvPlanes[0], im->yuvRowBytes[0],
-                                                 rgbaList.data(), im->width * 4,
-                                                 im->width, im->height);
-                if (result != 0) {
-                    throwException(env, "convert yuv to rgb with libyuv failed");
+                auto result1 = libyuv::I400ToARGB(
+                        im->yuvPlanes[0], im->yuvRowBytes[0],
+                        rgbaList.data(), im->width * 4,
+                        im->width, im->height);
+                if (result1 != 0) {
+                    throw std::runtime_error("convert yuv to rgb with libyuv failed");
                 }
                 return;
             }
 
             auto convertYUV = getYUVConvertFunc(im);
             if (convertYUV) {
-                auto result = convertYUV(
+                auto result1 = convertYUV(
                         im->yuvPlanes[0], im->yuvRowBytes[0],
                         im->yuvPlanes[1], im->yuvRowBytes[1],
                         im->yuvPlanes[2], im->yuvRowBytes[2],
                         rgbaList.data(), im->width * 4,
                         im->width, im->height);
-                if (result != 0) {
-                    throwException(env, "convert 8bpc limited yuv to rgb with libyuv failed");
+                if (result1 != 0) {
+                    throw std::runtime_error("convert 8bpc limited yuv to rgb with libyuv failed");
                 }
                 return;
             }
@@ -173,7 +174,7 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
         avifRGBImageAllocatePixels(rgb.get());
         avifImageYUVToRGB(im, rgb.get());
         if (rgbaList.size() != rgb->rowBytes * rgb->height) {
-            throwException(env, "invalid size");
+            throw std::runtime_error("invalid size");
         }
         memcpy(rgbaList.data(), rgb->pixels, rgb->rowBytes * rgb->height);
 
@@ -200,14 +201,15 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
         }
         switch (im->depth) {
             case 8:
-                copyAlphaPixels<uint8_t>(env, im, limitedRange, rgbaList);
+                copyAlphaPixels<uint8_t>(im, limitedRange, rgbaList);
                 break;
             case 10:
             case 12:
-                copyAlphaPixels<uint16_t>(env, im, limitedRange, rgbaList);
+                copyAlphaPixels<uint16_t>(im, limitedRange, rgbaList);
                 break;
-            default:
-                throwException(env, "unknown color depth");
+            default: {
+                throw std::runtime_error("unknown color depth");
+            }
         }
     }
 
@@ -226,12 +228,17 @@ Java_jp_co_link_1u_library_glideavif_AvifDecoderFromByteBuffer_decodeAvif(
     try {
         auto buffer = env->GetDirectBufferAddress(sourceData);
         if (buffer == nullptr) {
-            throwException(env, "allocation failed");
+            throw std::runtime_error("buffer must be DirectByteBuffer");
         }
 
         return decodeAvif(env, (const uint8_t *) buffer, sourceDataLength);
     }
     catch (const std::exception &e) {
+        throwRuntimeException(env, e.what());
+        return nullptr;
+    }
+    catch (...) {
+        throwRuntimeException(env, "unknown error occurred");
         return nullptr;
     }
 }

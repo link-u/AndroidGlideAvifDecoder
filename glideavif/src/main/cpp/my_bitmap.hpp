@@ -4,7 +4,6 @@
 #include <vector>
 #include <jni.h>
 #include <android/bitmap.h>
-#include <string>
 
 class MyBitmap {
 public:
