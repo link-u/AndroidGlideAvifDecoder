@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 
 class AvifDecoderFromByteBuffer : ResourceDecoder<ByteBuffer, Bitmap> {
     override fun handles(source: ByteBuffer, options: Options): Boolean {
-        return isAvif(source)
+        return source.isDirect && isAvif(source)
     }
 
     override fun decode(
@@ -19,6 +19,10 @@ class AvifDecoderFromByteBuffer : ResourceDecoder<ByteBuffer, Bitmap> {
         height: Int,
         options: Options
     ): Resource<Bitmap>? {
+        if (!source.isDirect) {
+            throw DecodeException("Buffer must be DirectByteBuffer")
+        }
+
         try {
             val bitmap =
                 decodeAvif(source, source.remaining())
