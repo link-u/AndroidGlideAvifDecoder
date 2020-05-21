@@ -56,9 +56,9 @@ int (*getYUVConvertFunc(avifImage *im))
          uint8_t *dst_abgr, int dst_stride_abgr,
          int width, int height) {
     switch (im->nclx.matrixCoefficients) {
-        // BT601_7_625/BT601_7_525でKrとKbは同じ（See: H.273）
-        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT601_7_625:
-        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT601_7_525:
+        // See: H.273
+        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT470BG:
+        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT601:
             switch (im->yuvFormat) {
                 case AVIF_PIXEL_FORMAT_YUV420:
                     return libyuv::I420ToABGR;
@@ -120,7 +120,7 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
     std::vector<uint8_t> rgbaList(im->width * im->height * 4);
 
     [&] {
-        if (im->nclx.fullRangeFlag && isGrayscale(im)) {
+        if (im->nclx.range == AVIF_RANGE_FULL && isGrayscale(im)) {
             // fullRangeかつGrayscaleの時だけは、Yの値をそのままコピーしてよい
             // FIXME(ledyba-z):
             //  transferCharacteristicsとmatrixCoefficientsの組み合わせによっては駄目な可能性がある
@@ -138,7 +138,7 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
             }
         }
 
-        if (!im->nclx.fullRangeFlag && im->depth == 8) {
+        if (!im->nclx.range == AVIF_RANGE_FULL && im->depth == 8) {
             // libyuv は8bitかつlimited rangeにのみ対応
             if (isGrayscale(im)) {
                 auto result1 = libyuv::I400ToARGB(
