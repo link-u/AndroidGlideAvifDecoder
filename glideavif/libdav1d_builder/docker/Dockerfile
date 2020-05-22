@@ -6,10 +6,10 @@ RUN apt-get update \
 
 WORKDIR /usr/local/src
 
-RUN curl -SL https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip > android-ndk-r20-linux-x86_64.zip && \
-    unzip -q android-ndk-r20-linux-x86_64.zip && \
-    mv android-ndk-r20b android-ndk && \
-    rm android-ndk-r20-linux-x86_64.zip
+RUN curl -SL https://dl.google.com/android/repository/android-ndk-r21-linux-x86_64.zip > android-ndk-r21-linux-x86_64.zip && \
+    unzip -q android-ndk-r21-linux-x86_64.zip && \
+    mv android-ndk-r21 android-ndk && \
+    rm android-ndk-r21-linux-x86_64.zip
 
 RUN ln -s /usr/bin/python3 /usr/bin/python && \
     pip3 install --user --no-warn-script-location meson
