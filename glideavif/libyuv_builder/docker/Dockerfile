@@ -28,7 +28,7 @@ RUN cmake \
     -DANDROID_ABI=$ARCH \
     -DANDROID_NATIVE_API_LEVEL=$API_LEVEL \
     -DBUILD_SHARED_LIBS=OFF \
-    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -GNinja \
     .. && ninja
 
