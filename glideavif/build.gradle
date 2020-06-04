@@ -65,7 +65,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository url: "file://${deployTo}"
-            pom.version = '0.5.0'
+            pom.version = '0.6.0'
             pom.groupId = 'jp.co.link_u.library.glideavif'
             pom.artifactId = 'glideavif'
         }
