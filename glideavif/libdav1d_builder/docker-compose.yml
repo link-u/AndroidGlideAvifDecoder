@@ -4,8 +4,9 @@ services:
   arm64-v8a:
     build:
       context: docker
-      args:
-        DAV1D_VERSION: 0.7.0
+      args: &args
+        NDK: r21d
+        DAV1D_VERSION: 0.7.1
         CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
         UTIL: "%CPU_FAMILY-linux-android"
         CPU_FAMILY: aarch64
@@ -20,14 +21,13 @@ services:
     build:
       context: docker
       args:
-        DAV1D_VERSION: 0.7.0
+        <<: *args
         CLANG: "%CPU_FAMILY-linux-androideabi%API_LEVEL-clang"
         UTIL: arm-linux-androideabi
         CPU_FAMILY: armv7a
         CPU: armv7
         API_LEVEL: 16
         ARCH: armeabi-v7a
-        LIBTYPE: static
     volumes:
       - ./build:/mnt/libdav1d
 
@@ -35,14 +35,10 @@ services:
     build:
       context: docker
       args:
-        DAV1D_VERSION: 0.7.0
-        CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
-        UTIL: "%CPU_FAMILY-linux-android"
+        <<: *args
         CPU_FAMILY: x86_64
         CPU: i686
-        API_LEVEL: 21
         ARCH: x86_64
-        LIBTYPE: static
     volumes:
       - ./build:/mnt/libdav1d
 
@@ -50,13 +46,12 @@ services:
     build:
       context: docker
       args:
-        DAV1D_VERSION: 0.7.0
+        <<: *args
         CLANG: "%CPU-linux-android%API_LEVEL-clang"
         UTIL: "%CPU-linux-android"
         CPU_FAMILY: x86
         CPU: i686
         API_LEVEL: 16
         ARCH: x86
-        LIBTYPE: static
     volumes:
       - ./build:/mnt/libdav1d
