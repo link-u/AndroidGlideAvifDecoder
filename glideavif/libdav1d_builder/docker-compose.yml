@@ -36,6 +36,7 @@ services:
       context: docker
       args:
         <<: *args
+        DAV1D_VERSION: 0.7.0
         CPU_FAMILY: x86_64
         CPU: i686
         ARCH: x86_64
@@ -47,6 +48,7 @@ services:
       context: docker
       args:
         <<: *args
+        DAV1D_VERSION: 0.7.0
         CLANG: "%CPU-linux-android%API_LEVEL-clang"
         UTIL: "%CPU-linux-android"
         CPU_FAMILY: x86
