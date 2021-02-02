@@ -55,10 +55,10 @@ int (*getYUVConvertFunc(avifImage *im))
          const uint8_t *src_v, int src_stride_v,
          uint8_t *dst_abgr, int dst_stride_abgr,
          int width, int height) {
-    switch (im->nclx.matrixCoefficients) {
+    switch (im->matrixCoefficients) {
         // See: H.273
-        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT470BG:
-        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT601:
+        case AVIF_MATRIX_COEFFICIENTS_BT470BG:
+        case AVIF_MATRIX_COEFFICIENTS_BT601:
             switch (im->yuvFormat) {
                 case AVIF_PIXEL_FORMAT_YUV420:
                     return libyuv::I420ToABGR;
@@ -70,7 +70,7 @@ int (*getYUVConvertFunc(avifImage *im))
                     return nullptr;
             }
             break;
-        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT709:
+        case AVIF_MATRIX_COEFFICIENTS_BT709:
             switch (im->yuvFormat) {
                 case AVIF_PIXEL_FORMAT_YUV420:
                     return libyuv::H420ToABGR;
@@ -82,7 +82,7 @@ int (*getYUVConvertFunc(avifImage *im))
                     return nullptr;
             }
             break;
-        case AVIF_NCLX_MATRIX_COEFFICIENTS_BT2020_NCL:
+        case AVIF_MATRIX_COEFFICIENTS_BT2020_NCL:
             switch (im->yuvFormat) {
                 case AVIF_PIXEL_FORMAT_YUV420:
                     return libyuv::U420ToABGR;
@@ -101,12 +101,14 @@ int (*getYUVConvertFunc(avifImage *im))
 }
 
 jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength) {
-    avifROData raw{};
-    raw.data = sourceData;
-    raw.size = (size_t) sourceDataLength;
-
     avifDecoderPtr decoder(avifDecoderCreate());
-    auto result = avifDecoderParse(decoder.get(), &raw);
+
+    auto result = avifDecoderSetIOMemory(decoder.get(), sourceData, (size_t) sourceDataLength);
+    if (result != AVIF_RESULT_OK) {
+        throw std::runtime_error("avifDecoderSetIOMemory failed");
+    }
+
+    result = avifDecoderParse(decoder.get());
     if (result != AVIF_RESULT_OK) {
         throw std::runtime_error("avifDecoderParse failed");
     }
@@ -120,7 +122,7 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
     std::vector<uint8_t> rgbaList(im->width * im->height * 4);
 
     [&] {
-        if (im->nclx.range == AVIF_RANGE_FULL && isGrayscale(im)) {
+        if (im->yuvRange == AVIF_RANGE_FULL && isGrayscale(im)) {
             // fullRangeかつGrayscaleの時だけは、Yの値をそのままコピーしてよい
             // FIXME(ledyba-z):
             //  transferCharacteristicsとmatrixCoefficientsの組み合わせによっては駄目な可能性がある
@@ -138,7 +140,7 @@ jobject decodeAvif(JNIEnv *env, const uint8_t *sourceData, int sourceDataLength)
             }
         }
 
-        if (!im->nclx.range == AVIF_RANGE_FULL && im->depth == 8) {
+        if (!im->yuvRange == AVIF_RANGE_FULL && im->depth == 8) {
             // libyuv は8bitかつlimited rangeにのみ対応
             if (isGrayscale(im)) {
                 auto result1 = libyuv::I400ToARGB(
