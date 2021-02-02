@@ -6,7 +6,7 @@ services:
       context: docker
       args: &args
         NDK: r21d
-        DAV1D_VERSION: 0.7.1
+        DAV1D_VERSION: 0.8.1
         CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
         UTIL: "%CPU_FAMILY-linux-android"
         CPU_FAMILY: aarch64
@@ -36,7 +36,6 @@ services:
       context: docker
       args:
         <<: *args
-        DAV1D_VERSION: 0.7.0
         CPU_FAMILY: x86_64
         CPU: i686
         ARCH: x86_64
@@ -48,7 +47,6 @@ services:
       context: docker
       args:
         <<: *args
-        DAV1D_VERSION: 0.7.0
         CLANG: "%CPU-linux-android%API_LEVEL-clang"
         UTIL: "%CPU-linux-android"
         CPU_FAMILY: x86

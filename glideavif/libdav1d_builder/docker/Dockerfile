@@ -47,7 +47,7 @@ RUN /root/.local/bin/meson .. \
 
 ARG ARCH
 RUN mkdir -p /opt/libdav1d/lib/${ARCH} /opt/libdav1d/include/${ARCH} && \
-    cp src/libdav1d.* /opt/libdav1d/lib/${ARCH}/ && \
+    cp src/libdav1d.a /opt/libdav1d/lib/${ARCH}/ && \
     cp -rf ../include/* /opt/libdav1d/include/${ARCH}/ && \
     find /opt/libdav1d/include/${ARCH}/ -type f -not -name "*.h" -exec rm {} + && \
     cp -rf include/* /opt/libdav1d/include/${ARCH}/
