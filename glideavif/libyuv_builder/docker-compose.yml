@@ -6,7 +6,7 @@ services:
       context: docker
       args: &args
         NDK: r21d
-        YUV_VERSION: 45f1f2b201672b699b35da20267a5f2c41318264
+        YUV_VERSION: c28d4049364d75710b1c49697a5814ab572af641
         API_LEVEL: 21
         ARCH: arm64-v8a
     volumes:

@@ -42,6 +42,21 @@ int I444ToI420(const uint8_t* src_y,
                int width,
                int height);
 
+// Convert I444 to NV12.
+LIBYUV_API
+int I444ToNV12(const uint8_t* src_y,
+               int src_stride_y,
+               const uint8_t* src_u,
+               int src_stride_u,
+               const uint8_t* src_v,
+               int src_stride_v,
+               uint8_t* dst_y,
+               int dst_stride_y,
+               uint8_t* dst_uv,
+               int dst_stride_uv,
+               int width,
+               int height);
+
 // Convert I444 to NV21.
 LIBYUV_API
 int I444ToNV21(const uint8_t* src_y,
@@ -248,19 +263,6 @@ int AYUVToNV21(const uint8_t* src_ayuv,
                int width,
                int height);
 
-// Convert M420 to I420.
-LIBYUV_API
-int M420ToI420(const uint8_t* src_m420,
-               int src_stride_m420,
-               uint8_t* dst_y,
-               int dst_stride_y,
-               uint8_t* dst_u,
-               int dst_stride_u,
-               uint8_t* dst_v,
-               int dst_stride_v,
-               int width,
-               int height);
-
 // Convert Android420 to I420.
 LIBYUV_API
 int Android420ToI420(const uint8_t* src_y,
@@ -427,7 +429,6 @@ int RAWToJ400(const uint8_t* src_raw,
               int width,
               int height);
 
-#ifdef HAVE_JPEG
 // src_width/height provided by capture.
 // dst_width/height for clipping determine final size.
 LIBYUV_API
@@ -457,13 +458,25 @@ int MJPGToNV21(const uint8_t* sample,
                int dst_width,
                int dst_height);
 
+// JPEG to NV12
+LIBYUV_API
+int MJPGToNV12(const uint8_t* sample,
+               size_t sample_size,
+               uint8_t* dst_y,
+               int dst_stride_y,
+               uint8_t* dst_uv,
+               int dst_stride_uv,
+               int src_width,
+               int src_height,
+               int dst_width,
+               int dst_height);
+
 // Query size of MJPG in pixels.
 LIBYUV_API
 int MJPGSize(const uint8_t* sample,
              size_t sample_size,
              int* width,
              int* height);
-#endif
 
 // Convert camera sample to I420 with cropping, rotation and vertical flip.
 // "src_size" is needed to parse MJPG.
