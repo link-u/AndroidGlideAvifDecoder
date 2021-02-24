@@ -6,7 +6,7 @@ services:
       context: docker
       args: &args
         NDK: r21d
-        DAV1D_VERSION: 0.8.1
+        DAV1D_VERSION: 0.8.2
         CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
         UTIL: "%CPU_FAMILY-linux-android"
         CPU_FAMILY: aarch64
