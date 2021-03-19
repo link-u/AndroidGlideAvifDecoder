@@ -1,18 +1,26 @@
 # AndroidGlideAvifDecoder
 
-![Build AAR](https://github.com/link-u/AndroidGlideAvifDecoder/workflows/Build%20AAR/badge.svg)
-
 ## Installation
-
-Download AAR from ![latest release](https://github.com/link-u/AndroidGlideAvifDecoder/releases)
-and put it to your project module's libs.
 
 Insert below line to build.gradle.
 ```
-implementation(name: 'glideavif', ext: 'aar', version: 'your-downloaded-version')
+repositories {
+    ...
+    maven { url 'https://github.com/link-u/AndroidGlideAvifDecoder/raw/master/repository' }
+    ...
+}
+
+...
+
+implementation 'jp.co.link_u.library.glideavif:glideavif'
 ```
 
-Add GradleModule to your project.
+or
+```
+implementation 'jp.co.link_u.library.glideavif:glideavif-8bpc'
+```
+
+`glideavif-8bpc` supports only 8bpc image. But, the library is lighter than full color depth.
 
 ## Example
 

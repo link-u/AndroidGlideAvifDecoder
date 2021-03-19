@@ -82,7 +82,7 @@ dependencies {
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
 }
 
-def mavenVersion = '0.8.0'
+def mavenVersion = '0.8.1'
 
 afterEvaluate {
     publishing {
