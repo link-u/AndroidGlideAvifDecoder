@@ -5,7 +5,7 @@ services:
     build:
       context: docker
       args: &args
-        NDK: r21d
+        NDK: r21e
         DAV1D_VERSION: 0.8.2
         CLANG: "%CPU_FAMILY-linux-android%API_LEVEL-clang"
         UTIL: "%CPU_FAMILY-linux-android"
@@ -14,13 +14,25 @@ services:
         API_LEVEL: 21
         ARCH: arm64-v8a
         LIBTYPE: static
+        DEPTH: "['8','16']"
+        DEPTH_NAME: full
+    volumes:
+      - ./build:/mnt/libdav1d
+
+  arm64-v8a-8bpc:
+    build:
+      context: docker
+      args:
+        <<: *args
+        DEPTH: "['8']"
+        DEPTH_NAME: only8bpc
     volumes:
       - ./build:/mnt/libdav1d
 
   armeabi-v7a:
     build:
       context: docker
-      args:
+      args: &armv7
         <<: *args
         CLANG: "%CPU_FAMILY-linux-androideabi%API_LEVEL-clang"
         UTIL: arm-linux-androideabi
@@ -31,10 +43,20 @@ services:
     volumes:
       - ./build:/mnt/libdav1d
 
-  x86_64:
+  armeabi-v7a-8bpc:
     build:
       context: docker
       args:
+        <<: *armv7
+        DEPTH: "['8']"
+        DEPTH_NAME: only8bpc
+    volumes:
+      - ./build:/mnt/libdav1d
+
+  x86_64:
+    build:
+      context: docker
+      args: &x64
         <<: *args
         CPU_FAMILY: x86_64
         CPU: i686
@@ -42,10 +64,20 @@ services:
     volumes:
       - ./build:/mnt/libdav1d
 
-  x86:
+  x86_64-8bpc:
     build:
       context: docker
       args:
+        <<: *x64
+        DEPTH: "['8']"
+        DEPTH_NAME: only8bpc
+    volumes:
+      - ./build:/mnt/libdav1d
+
+  x86:
+    build:
+      context: docker
+      args: &x86
         <<: *args
         CLANG: "%CPU-linux-android%API_LEVEL-clang"
         UTIL: "%CPU-linux-android"
@@ -53,5 +85,15 @@ services:
         CPU: i686
         API_LEVEL: 16
         ARCH: x86
+    volumes:
+      - ./build:/mnt/libdav1d
+
+  x86-8bpc:
+    build:
+      context: docker
+      args:
+        <<: *x86
+        DEPTH: "['8']"
+        DEPTH_NAME: only8bpc
     volumes:
       - ./build:/mnt/libdav1d

@@ -39,17 +39,20 @@ RUN sed -i  \
     -e 's/%TOOLCHAIN_ROOT/\/usr\/local\/src\/android-ndk\/toolchains\/llvm\/prebuilt\/linux-x86_64/' dav1d_cross.txt
 
 ARG LIBTYPE
+ARG DEPTH
 RUN /root/.local/bin/meson .. \
+    "-Dbitdepths=${DEPTH}" \
     --cross-file dav1d_cross.txt \
     --default-library ${LIBTYPE} \
     --buildtype release && \
     ninja
 
 ARG ARCH
-RUN mkdir -p /opt/libdav1d/lib/${ARCH} /opt/libdav1d/include/${ARCH} && \
-    cp src/libdav1d.a /opt/libdav1d/lib/${ARCH}/ && \
-    cp -rf ../include/* /opt/libdav1d/include/${ARCH}/ && \
-    find /opt/libdav1d/include/${ARCH}/ -type f -not -name "*.h" -exec rm {} + && \
-    cp -rf include/* /opt/libdav1d/include/${ARCH}/
+ARG DEPTH_NAME
+RUN mkdir -p /opt/libdav1d/${DEPTH_NAME}/lib/${ARCH} /opt/libdav1d/${DEPTH_NAME}/include/${ARCH} && \
+    cp src/libdav1d.a /opt/libdav1d/${DEPTH_NAME}/lib/${ARCH}/ && \
+    cp -rf ../include/* /opt/libdav1d/${DEPTH_NAME}/include/${ARCH}/ && \
+    find /opt/libdav1d/${DEPTH_NAME}/include/${ARCH}/ -type f -not -name "*.h" -exec rm {} + && \
+    cp -rf include/* /opt/libdav1d/${DEPTH_NAME}/include/${ARCH}/
 
 CMD ["cp", "-rf", "/opt/libdav1d", "/mnt/"]

@@ -15,6 +15,16 @@ android {
         testInstrumentationRunner 'androidx.benchmark.AndroidBenchmarkRunner'
     }
 
+    flavorDimensions "depth"
+    productFlavors {
+        full {
+            dimension "depth"
+        }
+        only8bpc {
+            dimension "depth"
+        }
+    }
+
     buildTypes {
         debug {
             // Since debuggable can't be modified by gradle for library modules,
