@@ -5,7 +5,7 @@ services:
     build:
       context: docker
       args: &args
-        NDK: r21d
+        NDK: r23b
         YUV_VERSION: c28d4049364d75710b1c49697a5814ab572af641
         API_LEVEL: 21
         ARCH: arm64-v8a

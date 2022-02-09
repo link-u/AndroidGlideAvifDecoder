@@ -1,0 +1,100 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "jp.co.link_u.library.glideavif",
+    "module": "glideavif-8bpc",
+    "version": "0.9.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.2"
+    }
+  },
+  "variants": [
+    {
+      "name": "only8bpcReleaseApiElements-published",
+      "attributes": {
+        "com.android.build.api.attributes.AgpVersionAttr": "7.1.1",
+        "com.android.build.api.attributes.ProductFlavor:depth": "only8bpc",
+        "depth": "only8bpc",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "files": [
+        {
+          "name": "glideavif-8bpc-0.9.0.aar",
+          "url": "glideavif-8bpc-0.9.0.aar",
+          "size": 6378381,
+          "sha512": "c01dcef1ee6eb052490e6b88ab5e65f2be8bb957224a1510fd90c05d677051a694608967ffe8befedb3a33b6a38e80413ae35d0c3367c5a01cbb4c78a9f0347f",
+          "sha256": "8bdd590997e460e449460a02ef2192f2e5e428d897ea70abb8fbd498a768cfa7",
+          "sha1": "88cb2ae46df21ebc9c6ed7dfec1da27036c4fa66",
+          "md5": "fd9c36a7c8fe67035033aed30972e3ba"
+        }
+      ]
+    },
+    {
+      "name": "only8bpcReleaseRuntimeElements-published",
+      "attributes": {
+        "com.android.build.api.attributes.AgpVersionAttr": "7.1.1",
+        "com.android.build.api.attributes.ProductFlavor:depth": "only8bpc",
+        "depth": "only8bpc",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib-jdk7",
+          "version": {
+            "requires": "1.5.30"
+          }
+        },
+        {
+          "group": "androidx.appcompat",
+          "module": "appcompat",
+          "version": {
+            "requires": "1.4.1"
+          }
+        },
+        {
+          "group": "androidx.core",
+          "module": "core-ktx",
+          "version": {
+            "requires": "1.7.0"
+          }
+        },
+        {
+          "group": "com.github.bumptech.glide",
+          "module": "glide",
+          "version": {
+            "requires": "4.11.0"
+          },
+          "excludes": [
+            {
+              "group": "com.android.support",
+              "module": "*"
+            }
+          ]
+        },
+        {
+          "group": "com.android.support",
+          "module": "support-fragment"
+        }
+      ],
+      "files": [
+        {
+          "name": "glideavif-8bpc-0.9.0.aar",
+          "url": "glideavif-8bpc-0.9.0.aar",
+          "size": 6378381,
+          "sha512": "c01dcef1ee6eb052490e6b88ab5e65f2be8bb957224a1510fd90c05d677051a694608967ffe8befedb3a33b6a38e80413ae35d0c3367c5a01cbb4c78a9f0347f",
+          "sha256": "8bdd590997e460e449460a02ef2192f2e5e428d897ea70abb8fbd498a768cfa7",
+          "sha1": "88cb2ae46df21ebc9c6ed7dfec1da27036c4fa66",
+          "md5": "fd9c36a7c8fe67035033aed30972e3ba"
+        }
+      ]
+    }
+  ]
+}

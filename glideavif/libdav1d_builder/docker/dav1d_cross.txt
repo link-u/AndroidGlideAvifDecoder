@@ -1,11 +1,10 @@
 [binaries]
 c = '%TOOLCHAIN_ROOT/bin/%CLANG'
 cpp = '%TOOLCHAIN_ROOT/bin/%CLANG++'
-ar = '%TOOLCHAIN_ROOT/bin/%UTIL-ar'
+ar = '%TOOLCHAIN_ROOT/bin/llvm-ar'
 as = '%TOOLCHAIN_ROOT/bin/%UTIL-as'
-ld = '%TOOLCHAIN_ROOT/bin/%UTIL-ld'
-strip = '%TOOLCHAIN_ROOT/bin/%UTIL-strip'
-objcopy = '%TOOLCHAIN_ROOT/bin/%UTIL-objcopy'
+strip = '%TOOLCHAIN_ROOT/bin/llvm-strip'
+objcopy = '%TOOLCHAIN_ROOT/bin/llvm-objcopy'
 pkgconfig = 'false'
 
 [host_machine]

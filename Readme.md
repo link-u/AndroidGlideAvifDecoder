@@ -12,12 +12,12 @@ repositories {
 
 ...
 
-implementation 'jp.co.link_u.library.glideavif:glideavif:0.8.1'
+implementation 'jp.co.link_u.library.glideavif:glideavif:0.9.0'
 ```
 
 or
 ```
-implementation 'jp.co.link_u.library.glideavif:glideavif-8bpc:0.8.1'
+implementation 'jp.co.link_u.library.glideavif:glideavif-8bpc:0.9.0'
 ```
 
 `glideavif-8bpc` supports only 8bpc image. But, the library is lighter than full color depth.
